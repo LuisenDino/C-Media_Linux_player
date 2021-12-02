@@ -1,8 +1,9 @@
 import pathlib
-#from bitmap import BitMap
 from ..Connection.UsbConnection import UsbConnection
 from ..Connection.SerialConnection import SerialConnection
 import time
+import math
+import cv2
 
 """
 Implementación de código de barras
@@ -87,11 +88,16 @@ class Printer():
         return self.__lineas_impresora
 
     #Metodos Impresora
-    def imprimir(self, lineas):
+    def imprimir(self, lineas, logo=None):
         self.i = 0
-        Tx = self.Ticket(lineas.split('\n'))
+        Tx = bytearray()
+        if logo:
+            Tx += self.Logo(logo)
+        
+        Tx += self.Ticket(lineas.split('\n'))
         self.printer.write(Tx)
         return Tx
+
     
     def get_paper(self):     #GS V
         self.printer.write(b'\x1B\x76')
@@ -149,17 +155,6 @@ class Printer():
             k+=1
         return devolver
             
-
-    """def imprimir(self, lineas, logo):
-        Tx = bytearray(20000)
-        self.i=0
-        Tx1 = self.Logo(logo)
-        Tx2 = self.Ticket(lineas)
-        Tx[:] = Tx1
-        Tx[len(Tx1):] = Tx2
-        self.printer.write(Tx)
-        return Tx
-    """
     def cargar(self, logo):
         self.i = 0
         Tx = self.Logo(logo)
@@ -169,20 +164,6 @@ class Printer():
     """
     Se recibe la infromación de la configuración desde el webview
     y se construye desde los comandos
-    """
-    """
-    def Ticket(self, lineas):
-        tx = bytearray()
-        tx.append(0x1B)
-        tx.append(0x40)
-        for linea in lineas.split(";"):
-            print(linea)
-            tx += bytearray(linea.encode('utf-8'))
-            tx.append(0x0A)
-            tx.append(0x0A)
-        tx += bytearray(b'\x1D\x56\x41\x01')
-        return tx
-
     """
     def Ticket(self, lineas):
         tamano4 = "small"
@@ -634,16 +615,45 @@ class Printer():
     
         return tx
     
-    def logo(self, logo):
-        #for p in range(50000):
-        #    for t in range(50):
+    def Logo(self, bitmap):
         array = bytearray()
-        posX = 0
-        posY = 0
-        pos = 0 
-        pixels = 0    
+        print(bitmap)
+        img =  cv2.imread(bitmap)
+        height, width = img.shape[0:2]
+        for row in range(height):
+            for col in range(width):
+                if all(img[row,col] != [255,255,255]):
+                    img[row,col,0] = 0
+                    img[row,col,1] = 0
+                    img[row,col,2] = 0
+
         array.append(0x1D)
         array.append(0x2A)
+        w = width / 8
+        h = height / 8 
+        array.append(math.ceil(w))
+        array.append(math.ceil(h))
+        pos = 0
+        posX = 0
+        posY = 0
+        pixels = 0
+
+        while pos <= (math.ceil(w)*math.ceil(w)*8):
+            for cont in range(7,-1, -1):
+                if posX > width -1: break
+                f = img[posY, posX]
+                if f[2] == 0:
+                    pixels += math.trunc(2**cont)
+                posY += 1
+                if (posY > height -1): break
+            array.append(pixels)
+            pos += 1
+            pixels = 0
+            if posY >= height:
+                posX +=1
+                posY = 0
+        return array
+
     """
 
 

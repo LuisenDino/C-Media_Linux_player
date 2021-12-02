@@ -3,11 +3,11 @@ import json
 import tkinter as tk
 import os
 import sys
-import pathlib
 
 def solve_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
-        return os.path.join(sys._MEIPASS, )
+        return os.path.join(sys._MEIPASS, relative_path)
+    print("Segundo hola")
     return os.path.join(os.path.abspath('.'), relative_path)
 
 
@@ -27,8 +27,8 @@ def main():
         root.overrideredirect(1)    
     root.geometry(str(sett["AnchoRequerido"])+"x"+str(sett["AltoRequerido"])+"+"+str(sett["LeftRequerido"])+"+"+str(sett["TopRequerido"]))
 
-
-    icon = tk.PhotoImage(file='App/Media/LOGO-CMedia.png')   
+    path = solve_path('App/Media/LOGO-CMedia.png') 
+    icon = tk.PhotoImage(file=path)   
     root.tk.call('wm', 'iconphoto', root._w, icon)
 
     for pantalla in screen_config["Pantallas"]:
@@ -53,9 +53,9 @@ def get_sett():
     Obtiene la informacion de configuracion de la aplicacion
     :return: dic. Configuracion extraida del archivo json
     """
-    path = solve_path("../config/config.json") 
-    print(os.listdir(pathlib.Path(__file__).parent.resolve()))
-    with open("App/Media/config.json", "r") as file:
+    path = solve_path("App/Media/config.json") 
+    print(path)
+    with open(path, "r") as file:
         sett = json.load(file)
     return sett
 
