@@ -1,5 +1,7 @@
+from math import log
 import usb.core #Libreria que permite hacer la conexion con puertos Usb
 import usb.util #Libreria que permite leer y escribir sobre puertos usb
+import logging #Libreria de logging
 
 class UsbConnection():
     """
@@ -39,7 +41,7 @@ class UsbConnection():
         self.device = usb.core.find(idVendor = self.id_vendor, idProduct = self.id_product)
 
         if self.device is None:
-            print("Equipo no encontrado")
+            logging.warning("Equipo no encontrado")
             return "Equipo no encontrado"
 
         ep = self.device[0].interfaces()[0].endpoints() 
@@ -51,7 +53,7 @@ class UsbConnection():
             try:
                 self.device.detach_kernel_driver(self.interface)
             except Exception as e:
-                print(e) 
+                logging.error(str(e))
                 return str(e)
 
         try:
@@ -62,7 +64,7 @@ class UsbConnection():
             if self.ep_in == None:
                 self.ep_in = ep[1].bEndpointAddress
         except Exception as e:
-            print(e)
+            logging.error(str(e))
             return str(e)
 
     def write(self, data):
@@ -70,12 +72,20 @@ class UsbConnection():
         La funcion escribe un conjunto de bytes en el puerto USB.
         :param data: bytearray. Conjunto de bytes a escribir en el puertp USB.
         """
-        self.device.write(self.ep_out, data, timeout = self.timeout)
+        try:
+            self.device.write(self.ep_out, data, timeout = self.timeout)
+        except Exception as e:
+            logging.error(str(e))
+            return str(e)
 
     def read(self):
         """
         La funcion lee una cantidad de bytes del puerto USB.
         :return: array. Conjunto de bytes con informacion leidos en el puerto USB. 
         """
-        return self.device.read(self.ep_in, self.timeout)
+        try:
+            return self.device.read(self.ep_in, self.timeout)
+        except Exception as e:
+            logging.error(str(e))
+            return str(e)
         

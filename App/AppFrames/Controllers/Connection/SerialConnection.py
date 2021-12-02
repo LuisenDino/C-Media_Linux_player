@@ -1,4 +1,5 @@
 import serial #libreria que permite la conexion con puerto serial
+import logging #libreria de logging
 
 class SerialConnection():
     """
@@ -29,6 +30,7 @@ class SerialConnection():
         try:
             self.device = serial.Serial(self.port, timeout = self.timeout, baudrate = self.baudrate)
         except Exception as e:
+            logging.error(str(e))
             return str(e)
 
     def write(self, data):
@@ -36,17 +38,29 @@ class SerialConnection():
         La funcion escribe un conjunto de bytes en el puerto USB.
         :param data: bytearray. Conjunto de bytes a escribir en el puertp USB.
         """
-        self.device.write(data)
+        try:
+            self.device.write(data)
+        except Exception as e:
+            logging.error(str(e))
+            return str(e)
 
     def read(self):
         """
         La funcion lee una cantidad de bytes del puerto USB.
         :return: array. Conjunto de bytes con informacion leidos en el puerto USB. 
         """
-        self.device.readline()
+        try:
+            return self.device.readline()
+        except Exception as e:
+            logging.error(str(e))
+            return str(e)
 
     def diconnect(self):
         """
         La funcion cierra la conexion con el puerto serial
         """
-        self.device.close()
+        try:
+            self.device.close()
+        except Exception as e:
+            logging.error(str(e))
+            return str(e)

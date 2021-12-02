@@ -1,3 +1,4 @@
+import logging
 import tkinter as tk #Librería GUI
 from cefpython3 import cefpython as cef #Librería Chromium Embeded Framework
 from .JSBridge import JSBridge #Clase que permite la interaccipn entre la url y la aplicacion local
@@ -32,7 +33,10 @@ class WebViewFrame(tk.Frame):
         rect = [0, 0, self.winfo_width(), self.winfo_height()]  #Informacion del rectangulo del frame del contenedor CEF [Left, Top, Right, Bottom]
         window_info.SetAsChild(self.winfo_id(), rect) #Crea el navegador como una ventana/vista hijo
         self.config(bg="red")
-        self.browser = cef.CreateBrowserSync(window_info, url=self.url) #Creacion del navegador
+        try:
+            self.browser = cef.CreateBrowserSync(window_info, url=self.url) #Creacion del navegador
+        except Exception as e:
+            logging.error(str(e))
         assert self.browser
         
         self.message_loop_work()

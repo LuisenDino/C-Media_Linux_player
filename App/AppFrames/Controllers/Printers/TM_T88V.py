@@ -1,13 +1,9 @@
-import pathlib
-from ..Connection.UsbConnection import UsbConnection
-from ..Connection.SerialConnection import SerialConnection
-import time
-import math
-import cv2
-
-"""
-Implementación de código de barras
-"""
+import pathlib #Libreria de control de directorios
+from ..Connection.UsbConnection import UsbConnection #Libreria de conexion usb
+from ..Connection.SerialConnection import SerialConnection #Libreria de conexion serial
+import time #Libreria control de tiempo (hilo principal)
+import math #Libreria de matematicas
+import cv2 #Libreria de manipulacion de imagenes
 
 class Printer():
 
@@ -18,41 +14,28 @@ class Printer():
     """
     
     def __init__(self, device, usb = False):
+        
         """
         Constructor de clase
         :param device: dic. Datos de la impresora: id_vendor e id_product (USB) o puerto (Serial)
         :param usb: bool. Uso o no de puerto serial
         """
-        #self.i = 0
+
         self.__cambios = {}
-        self.__lineas_impresora = {}
         self.__version = None
         self
-        #self.version = Assembly.GetExecutingAssembly().GetName().Version; # verificar linea de version
-
+            
         if usb:
             self.printer = UsbConnection(int(device["id_vendor"], 16), int(device["id_product"], 16))
         else:
             self.printer = SerialConnection(device["port"]) #/dev/ttyUSB0 para puerto serial usb 0
 
         #Constructor
-        self.detalle = "Manejo de puerto USB o puerto serial segun selecciosn"
+        self.detalle = "Manejo de puerto USB o puerto serial segun selección"
         self.__cambios[self.__version] = self.detalle
-        self.__lineas_impresora[1] = 20
-        self.__lineas_impresora[2] = 20
-        self.__lineas_impresora[3] = 20
-        self.__lineas_impresora[4] = 20
-        self.__lineas_impresora[5] = 20
-        self.__lineas_impresora[6] = 20
-        self.__lineas_impresora[7] = 20
-        self.__lineas_impresora[8] = 20
-        self.__lineas_impresora[9] = 20
-        self.__lineas_impresora[10] = 20
-        self.__lineas_impresora[11] = 20
-        self.__lineas_impresora[12] = 20
-        self.__lineas_impresora[13] = 20
-        self.__lineas_impresora[14] = 20
-        self.__lineas_impresora[15] = 20
+
+    def getPrinter(self):
+        return self.printer
 
     #ILibretaInfo Members
 
@@ -76,20 +59,16 @@ class Printer():
     def Version(self):
         return self.__version
     
-    """
-    @property
-    def bitmap(self):
-        return Properties.Resources.Tiquete;
-        
-    """
-
-    @property
-    def Lineas(self):
-        return self.__lineas_impresora
-
     #Metodos Impresora
     def imprimir(self, lineas, logo=None):
-        self.i = 0
+
+        """
+        Imprime un Ticket
+        :param lineas: str. lineas de impresion separadas por un salto de linea '\\n'
+        :param logo: str. opc. ubicacion del logo en formato .bmp
+        :return: bytearray. Arreglo de bits con la informacion del ticket 
+        """
+
         Tx = bytearray()
         if logo:
             Tx += self.Logo(logo)
@@ -99,9 +78,14 @@ class Printer():
         return Tx
 
     
-    def get_paper(self):     #GS V
-        self.printer.write(b'\x1B\x76')
-        time.sleep(0.040)       
+    def get_paper(self):     
+
+        """
+        Retorna el estado del papel de la impresora
+        :return: dic. estado del papel de la impresora
+        """
+         
+        self.printer.write(b'\x1B\x76') #GS V       
         paper_state = self.printer.read()
         response = {}
         if len(paper_state) == 0:
@@ -110,10 +94,14 @@ class Printer():
             response["message"] = "El papel está por acabarse"
         elif paper_state[0] == 0:
             response["message"] = "La impresora tiene papel"
-
         return response
 
     def Letras(self, caracter):
+        """
+        Soporte a caracteres especiales de utf-8
+        :params caracter: bytearray. Informacion de un caracter
+        :return: bytearray. Caracter especial en formato imprimible
+        """
         array = caracter
         devolver = bytearray()
         k = 0
@@ -156,16 +144,25 @@ class Printer():
         return devolver
             
     def cargar(self, logo):
-        self.i = 0
+        
+        """
+        Carga un logo en la impresora
+        :param logo: str. ubicacion del logo a ser cargado
+        :return: bytearray. informacion del logo
+        """
+        
         Tx = self.Logo(logo)
+        self.printer.write(Tx) 
         return Tx
 
-
-    """
-    Se recibe la infromación de la configuración desde el webview
-    y se construye desde los comandos
-    """
     def Ticket(self, lineas):
+
+        """
+        Crea el formato del Ticket
+        :param lineas: str. Lineas a imprimir separadas por un salto de linea '\\n'
+        :return: bytearray. Ticket imprimible
+        """
+
         tamano4 = "small"
         tamano5 = "small"
         tamano6 = "small"
@@ -352,7 +349,7 @@ class Printer():
         tx += bytearray([0x1D, 0x5C, 0x28, 0x00]) # posicion vertical relativa            
         tx += bytearray([0x1B, 0x21, 0x30]) # seleccionar modo de impresion
 
-        # str.encode('utf-8')
+
         #region linea 1
         if tamano > 1:
             if lineas[0] not in nempty:
@@ -564,6 +561,7 @@ class Printer():
         tx += bytearray([0x1B, 0x54, 0x01]) # direccion de impresion de derecha a izquierda
         tx += bytearray([0x1B, 0x33, 0x18]) # seleccionar espaciado
         tx += bytearray([0x1B, 0x21, 0x00, 0x09]) # seleccionar modo de impresion 
+        #region linea 8
         if tamano > 7:
         
             if lineas[7] not in nempty:
@@ -616,8 +614,14 @@ class Printer():
         return tx
     
     def Logo(self, bitmap):
+
+        """
+        Decodifica el Logo para la impresora
+        :param bitmap: str. ubicacion del logo en formato .bmp
+        :return: bytearray. i
+        """
+
         array = bytearray()
-        print(bitmap)
         img =  cv2.imread(bitmap)
         height, width = img.shape[0:2]
         for row in range(height):
@@ -627,8 +631,8 @@ class Printer():
                     img[row,col,1] = 0
                     img[row,col,2] = 0
 
-        array.append(0x1D)
-        array.append(0x2A)
+        array.append(0x1D) #GS
+        array.append(0x2A) #*
         w = width / 8
         h = height / 8 
         array.append(math.ceil(w))
@@ -653,97 +657,3 @@ class Printer():
                 posX +=1
                 posY = 0
         return array
-
-    """
-
-
-    private byte[] Logo(Bitmap log)
-    {
-        for (int p = 0; p < 50000; p++)
-        {
-            for (int t = 0; t < 50; t++) ;
-        }
-        byte[] array = new byte[200000];
-        int posX = 0;
-        int posY = 0;
-        int pos = 0;
-        byte pixels = 0;
-        array[i++] = (byte)0x1D;
-        array[i++] = (byte)0x2A;
-        float w = (float)log.Width / 8;
-        array[i++] = Convert.ToByte(Math.Ceiling(w));
-        float h = (float)log.Height / 8;
-        array[i++] = Convert.ToByte(Math.Ceiling(h));
-        do
-        {
-            for (int cont = 7; cont >= 0; cont--)
-            {
-                if (posX > log.Width - 1) break;
-                Color f = log.GetPixel(posX, posY);
-                if (f.R == 0)
-                    pixels = Convert.ToByte(pixels + Math.Truncate(Math.Pow(2, cont)));
-                posY += 1;
-                if (posY > log.Height - 1) break;
-            }
-            array[i++] = pixels;
-            pos += 1;
-            pixels = 0;
-            if (posY >= log.Height)
-            {
-                posX += 1;
-                posY = 0;
-            }
-
-        } while (pos <= (Math.Ceiling(w) * Math.Ceiling(h)) * 8);
-
-        byte[] tx_return = new byte[i];
-        for (int pasar = 0; pasar < i; pasar++)
-            tx_return[pasar] = array[pasar];
-
-        return tx_return;
-    }       
-"""
-    
-            
-
-
-"""
-private byte[] self.Letras(byte[] caracter, int cantidad)
-        {
-            byte[] array = new byte[caracter.Length];
-            array = caracter;
-            int cant = cantidad;
-            byte[] devolver = new byte[cant];
-            int s = 0;
-
-            for (int k = 0; k < array.Length; k++)
-            {
-                if (array[k] == 195)
-                {
-                    if (array[k + 1] == 161) devolver[s++] = 160;         // á
-                    else if (array[k + 1] == 169) devolver[s++] = 130;    // é
-                    else if (array[k + 1] == 173) devolver[s++] = 161;    // í
-                    else if (array[k + 1] == 179) devolver[s++] = 162;    // ó
-                    else if (array[k + 1] == 186) devolver[s++] = 163;    // ú
-                    else if (array[k + 1] == 177) devolver[s++] = 164;    // ñ
-                    else if (array[k + 1] == 145) devolver[s++] = 165;    // Ñ
-                  
-                    else if (array[k + 1] == 129) devolver[s++] = 181;    // Á
-                    else if (array[k + 1] == 137) devolver[s++] = 144;    // É
-                    else if (array[k + 1] == 141) devolver[s++] = 214;    // Í
-                    else if (array[k + 1] == 147) devolver[s++] = 224;    // Ó
-                    else if (array[k + 1] == 154) devolver[s++] = 233;    // Ú
-                    k++;
-
-                }
-                else if (array[k] == 194)
-                {
-                    if (array[k + 1] == 191) devolver[s++] = 168;         // ¿
-                    if (array[k + 1] == 161) devolver[s++] = 173;         // ¡
-                    k++;
-                }
-                else devolver[s++] = array[k];
-            }
-            return devolver;
-        }
-        """

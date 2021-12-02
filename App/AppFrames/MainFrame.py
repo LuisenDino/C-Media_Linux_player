@@ -1,7 +1,7 @@
+import logging
 import tkinter as tk
 from .WebViewFrame import WebViewFrame
 from .PrinterFrame import PrinterFrame
-import json
 from cefpython3 import cefpython as cef
 
 class MainFrame(tk.Frame):
@@ -43,7 +43,11 @@ class MainFrame(tk.Frame):
         tk.Grid.columnconfigure(self, 0, weight=1)
         self.pack(fill=tk.BOTH, expand=tk.YES)
         if(self.webview_frame):
-            cef.Initialize()
+            try:
+                cef.Initialize()
+            except Exception as e :
+                logging.error(str(e))
+                return e
 
     def on_close(self):
         """
@@ -54,7 +58,10 @@ class MainFrame(tk.Frame):
             self.webview_frame.on_root_close()
         self.master.destroy()
         if(self.webview_frame):
-            cef.Shutdown()  
+            try:
+                cef.Shutdown()  
+            except Exception as e:
+                logging.error(str(e))
 
     def on_root_configure(self, _):
         """

@@ -1,6 +1,6 @@
 import json
 import inspect
-
+import logging
 
 class JSBridge:
     """
@@ -127,6 +127,7 @@ class JSBridge:
                 }
                 result = json.dumps(error).replace('\\', '\\\\').replace('\'', '\\\'')
                 code = 'window.api.returnValues["{0}"]["{1}"]["{2}"] = {{isError: true, value:\'{3}\'}}'.format(controller, func_name, id, result)
+                logging.error(str(e))
             self.browser.ExecuteJavascript(code)
         func = getattr(self.api[controller], func_name, None)
         

@@ -1,3 +1,4 @@
+import logging
 from AppFrames.MainFrame import MainFrame
 import json
 import tkinter as tk
@@ -7,7 +8,6 @@ import sys
 def solve_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
         return os.path.join(sys._MEIPASS, relative_path)
-    print("Segundo hola")
     return os.path.join(os.path.abspath('.'), relative_path)
 
 
@@ -44,9 +44,13 @@ def get_screen_config(ruta):
     :param ruta: str. Ruta donde se encuentra el archivo de configuracion
     :return: dic. Configuracion extraida del archivo json
     """
-    with open(ruta, 'r', encoding="utf-8-sig") as file:
-        screen_config = json.load(file)
-    return screen_config
+    try:
+        with open(ruta, 'r', encoding="utf-8-sig") as file:
+            screen_config = json.load(file)
+        return screen_config
+    except Exception as e:
+        logging.error(str(e))
+        return str(e)
 
 def get_sett():
     """
@@ -54,10 +58,15 @@ def get_sett():
     :return: dic. Configuracion extraida del archivo json
     """
     path = solve_path("App/Media/config.json") 
-    print(path)
-    with open(path, "r") as file:
-        sett = json.load(file)
-    return sett
+    try:
+        with open(path, "r") as file:
+            sett = json.load(file)
+        return sett
+    except Exception as e:
+        logging.error(str(e))
+        return str(e)
+
+    
 
 if __name__ == "__main__":
     main()
