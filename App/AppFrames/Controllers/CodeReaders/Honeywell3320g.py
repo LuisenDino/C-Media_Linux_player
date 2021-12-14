@@ -12,7 +12,6 @@ class BarCodeReader():
         self.killThread = False
 
         self.connect()
-        print(self.reader)
         #Constructor
         self.detalle = "Manejo de puerto serial"
 
@@ -29,7 +28,6 @@ class BarCodeReader():
             return str(e)
         
         if(self.thread == None):
-            print("inicio hilo")
             self.thread = threading.Thread(target=self.receiveData)
             self.thread.start()
             
