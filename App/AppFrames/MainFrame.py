@@ -1,5 +1,8 @@
 import logging
 import tkinter as tk
+import sys
+
+from .CodeReaderFrame import CodeReaderFrame
 from .WebViewFrame import WebViewFrame
 from .PrinterFrame import PrinterFrame
 from cefpython3 import cefpython as cef
@@ -38,6 +41,9 @@ class MainFrame(tk.Frame):
             elif "Control.NavegadorWebChrome.dll" in controller["NombreArchivo"]:
                 self.webview_frame = WebViewFrame(self, url=controller["ObjetoBase"]["UrlInicio"])
                 self.webview_frame.grid(row=1, column=0,sticky=(tk.N + tk.S + tk.E + tk.W))
+            elif "Control.CodeReader.dll" in controller["NombreArchivo"]:
+                self.code_reader_frame = CodeReaderFrame(None)
+                self.apis["code_reader"] = self.code_reader_frame.get_code_reader()
 
         tk.Grid.rowconfigure(self, 1, weight=1)
         tk.Grid.columnconfigure(self, 0, weight=1)
@@ -62,6 +68,8 @@ class MainFrame(tk.Frame):
                 cef.Shutdown()  
             except Exception as e:
                 logging.error(str(e))
+        self.get_code_reader_frame().get_code_reader().disconnect()
+        sys.exit()
 
     def on_root_configure(self, _):
         """
@@ -95,3 +103,5 @@ class MainFrame(tk.Frame):
         """
         return self.printer_frame
         
+    def get_code_reader_frame(self):
+        return self.code_reader_frame

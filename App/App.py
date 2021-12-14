@@ -4,6 +4,9 @@ import json
 import tkinter as tk
 import os
 import sys
+import platform
+
+print(platform.python_version())
 
 def solve_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
@@ -35,7 +38,8 @@ def main():
         pantallas[pantalla["ScreenNumber"]] = MainFrame(root, pantalla["Controles"])
         if(pantalla["ScreenNumber"]==1):
           root.title(pantalla["TitleName"])
-    pantallas[1].mainloop()
+    pantallas[1].mainloop() 
+    
 
 
 def get_screen_config(ruta):

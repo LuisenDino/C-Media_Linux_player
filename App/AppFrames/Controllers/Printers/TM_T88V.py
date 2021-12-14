@@ -23,7 +23,6 @@ class Printer():
 
         self.__cambios = {}
         self.__version = None
-        self
             
         if usb:
             self.printer = UsbConnection(int(device["id_vendor"], 16), int(device["id_product"], 16))
@@ -620,7 +619,7 @@ class Printer():
         :param bitmap: str. ubicacion del logo en formato .bmp
         :return: bytearray. i
         """
-
+        print(bitmap)
         array = bytearray()
         img =  cv2.imread(bitmap)
         height, width = img.shape[0:2]

@@ -1,313 +1,193 @@
-"""General testing of CEF Python."""
-
-import unittest
-# noinspection PyUnresolvedReferences
-import _test_runner
-from os.path import basename
 from cefpython3 import cefpython as cef
-import time
 import base64
+import platform
 import sys
+import threading
 
-# To show the window for an extended period of time increase this number.
-MESSAGE_LOOP_RANGE = 25  # each iteration is 0.01 sec
-
-g_datauri_data = """
+# HTML code. Browser will navigate to a Data uri created
+# from this html code.
+HTML_code = """
 <!DOCTYPE html>
 <html>
 <head>
     <style type="text/css">
-    body,html {
-        font-family: Arial;
-        font-size: 11pt;
-    }
+    body,html { font-family: Arial; font-size: 11pt; }
+    div.msg { margin: 0.2em; line-height: 1.4em; }
+    b { background: #ccc; font-weight: bold; font-size: 10pt;
+        padding: 0.1em 0.2em; }
+    b.Python { background: #eee; }
+    i { font-family: Courier new; font-size: 10pt; border: #eee 1px solid;
+        padding: 0.1em 0.2em; }
     </style>
     <script>
-    function print(msg) {
-        console.log(msg+" [JS]");
-        msg = msg.replace("ok", "<b style='color:green'>ok</b>");
-        msg = msg.replace("error", "<b style='color:red'>error</b>");
-        document.getElementById("console").innerHTML += msg+"<br>";
+    function js_print(lang, event, msg) {
+        msg = "<b class="+lang+">"+lang+": "+event+":</b> " + msg;
+        console = document.getElementById("console")
+        console.innerHTML += "<div class=msg>"+msg+"</div>";
+    }
+    function js_callback_1(ret) {
+        js_print("Javascript", "html_to_data_uri", ret);
+    }
+    function js_callback_2(msg, py_callback) {
+        js_print("Javascript", "js_callback", msg);
+        py_callback("String sent from Javascript");
     }
     window.onload = function(){
-        print("window.onload() ok");
-        // Test binding property: test_property1
-        if (test_property1 == "Test binding property to the 'window' object") {
-            print("test_property_1 ok");
-        } else {
-            throw new Error("test_property1 contains invalid string");
-        }
-        // Test binding property: test_property2
-        if (JSON.stringify(test_property2) == '{"key1":"Test binding property'+
-                ' to the \\'window\\' object","key2":["Inside list",1,2]}') {
-            print("test_property2 ok");
-        } else {
-            throw new Error("test_property2 contains invalid value");
-        }
-        // Test binding function: test_function
-        test_function();
-        print("test_function() ok");
-        // Test binding external object and use of javascript<>python callbacks
-        var start_time = new Date().getTime();
-        print("[TIMER] Call Python function and then js callback that was"+
-              " passed (Issue #277 test)");
-        external.test_callbacks(function(msg_from_python, py_callback){
-            if (msg_from_python == "String sent from Python") {
-                print("test_callbacks() ok");
-                var execution_time = new Date().getTime() - start_time;
-                print("[TIMER]: Elapsed = "+String(execution_time)+" ms");
-            } else {
-                throw new Error("test_callbacks(): msg_from_python contains"+
-                                " invalid value");
-            }
-            py_callback("String sent from Javascript");
-            print("py_callback() ok");
-        });
+        js_print("Javascript", "window.onload", "Called");
+        js_print("Javascript", "python_property", python_property);
+        js_print("Javascript", "navigator.userAgent", navigator.userAgent);
+        js_print("Javascript", "cefpython_version", cefpython_version.version);
+        html_to_data_uri("test", js_callback_1);
+        external.test_multiple_callbacks(js_callback_2);
     };
     </script>
 </head>
 <body>
-    <!-- FrameSourceVisitor hash = 747ef3e6011b6a61e6b3c6e54bdd2dee -->
-    <h1>Main test</h1>
+    <h1>Tutorial example</h1>
     <div id="console"></div>
 </body>
 </html>
 """
-g_datauri = "data:text/html;base64,"+base64.b64encode(g_datauri_data.encode(
-        "utf-8", "replace")).decode("utf-8", "replace")
-
-g_subtests_ran = 0
 
 
-def subtest_message(message):
-    global g_subtests_ran
-    g_subtests_ran += 1
-    print(str(g_subtests_ran) + ". " + message)
-    sys.stdout.flush()
+def main():
+    check_versions()
+    sys.excepthook = cef.ExceptHook  # To shutdown all CEF processes on error
+    # To change user agent use either "product_version"
+    # or "user_agent" options. Explained in Tutorial in
+    # "Change user agent string" section.
+    settings = {
+        # "product_version": "MyProduct/10.00",
+        # "user_agent": "MyAgent/20.00 MyProduct/10.00",
+    }
+    cef.Initialize(settings=settings)
+    set_global_handler()
+    browser = cef.CreateBrowserSync(url=html_to_data_uri(HTML_code),
+                                    window_title="Tutorial")
+    set_client_handlers(browser)
+    set_javascript_bindings(browser)
+    cef.MessageLoop()
+    cef.Shutdown()
 
 
-class MainTest_IsolatedTest(unittest.TestCase):
+def check_versions():
+    ver = cef.GetVersion()
+    print("[tutorial.py] CEF Python {ver}".format(ver=ver["version"]))
+    print("[tutorial.py] Chromium {ver}".format(ver=ver["chrome_version"]))
+    print("[tutorial.py] CEF {ver}".format(ver=ver["cef_version"]))
+    print("[tutorial.py] Python {ver} {arch}".format(
+           ver=platform.python_version(),
+           arch=platform.architecture()[0]))
+    assert cef.__version__ >= "57.0", "CEF Python v57.0+ required to run this"
 
-    def test_main(self):
-        """Main entry point."""
-        # All this code must run inside one single test, otherwise strange
-        # things happen.
-        print("")
-        print("CEF Python {ver}".format(ver=cef.__version__))
-        print("Python {ver}".format(ver=sys.version[:6]))
 
-        # Test initialization of CEF
-        cef.Initialize({
-            "debug": False,
-            "log_severity": cef.LOGSEVERITY_ERROR,
-            "log_file": "",
-        })
-        subtest_message("cef.Initialize() ok")
+def html_to_data_uri(html, js_callback=None):
+    # This function is called in two ways:
+    # 1. From Python: in this case value is returned
+    # 2. From Javascript: in this case value cannot be returned because
+    #    inter-process messaging is asynchronous, so must return value
+    #    by calling js_callback.
+    html = html.encode("utf-8", "replace")
+    b64 = base64.b64encode(html).decode("utf-8", "replace")
+    ret = "data:text/html;base64,{data}".format(data=b64)
+    if js_callback:
+        js_print(js_callback.GetFrame().GetBrowser(),
+                 "Python", "html_to_data_uri",
+                 "Called from Javascript. Will call Javascript callback now.")
+        js_callback.Call(ret)
+    else:
+        return ret
 
-        # Test global handler
-        global_handler = GlobalHandler(self)
-        cef.SetGlobalClientCallback("OnAfterCreated",
-                                    global_handler._OnAfterCreated)
-        subtest_message("cef.SetGlobalClientCallback() ok")
 
-        # Test creation of browser
-        browser = cef.CreateBrowserSync(url=g_datauri)
-        self.assertIsNotNone(browser, "Browser object")
-        subtest_message("cef.CreateBrowserSync() ok")
+def set_global_handler():
+    # A global handler is a special handler for callbacks that
+    # must be set before Browser is created using
+    # SetGlobalClientCallback() method.
+    global_handler = GlobalHandler()
+    cef.SetGlobalClientCallback("OnAfterCreated",
+                                global_handler.OnAfterCreated)
 
-        # Test other handlers: LoadHandler, DisplayHandler etc.
-        client_handlers = [LoadHandler(self), DisplayHandler(self)]
-        for handler in client_handlers:
-            browser.SetClientHandler(handler)
-        subtest_message("browser.SetClientHandler() ok")
 
-        # Test javascript bindings
-        external = External(self)
-        bindings = cef.JavascriptBindings(
-                bindToFrames=False, bindToPopups=False)
-        bindings.SetFunction("test_function", external.test_function)
-        bindings.SetProperty("test_property1", external.test_property1)
-        bindings.SetProperty("test_property2", external.test_property2)
-        bindings.SetObject("external", external)
-        browser.SetJavascriptBindings(bindings)
-        subtest_message("browser.SetJavascriptBindings() ok")
+def set_client_handlers(browser):
+    client_handlers = [LoadHandler(), DisplayHandler()]
+    for handler in client_handlers:
+        browser.SetClientHandler(handler)
 
-        # Run message loop for 0.5 sec.
-        # noinspection PyTypeChecker
-        for i in range(MESSAGE_LOOP_RANGE):
-            cef.MessageLoopWork()
-            time.sleep(0.01)
-        subtest_message("cef.MessageLoopWork() ok")
 
-        # Test browser closing. Remember to clean reference.
-        browser.CloseBrowser(True)
-        del browser
-        subtest_message("browser.CloseBrowser() ok")
+def set_javascript_bindings(browser):
+    external = External(browser)
+    bindings = cef.JavascriptBindings(
+            bindToFrames=False, bindToPopups=False)
+    bindings.SetProperty("python_property", "This property was set in Python")
+    bindings.SetProperty("cefpython_version", cef.GetVersion())
+    bindings.SetFunction("html_to_data_uri", html_to_data_uri)
+    bindings.SetObject("external", external)
+    browser.SetJavascriptBindings(bindings)
 
-        # Give it some time to close before calling shutdown.
-        # noinspection PyTypeChecker
-        for i in range(25):
-            cef.MessageLoopWork()
-            time.sleep(0.01)
 
-        # Automatic check of asserts in handlers and in external
-        for obj in [] + client_handlers + [global_handler, external]:
-            test_for_True = False  # Test whether asserts are working correctly
-            for key, value in obj.__dict__.items():
-                if key == "test_for_True":
-                    test_for_True = True
-                    continue
-                if "_True" in key:
-                    self.assertTrue(value, "Check assert: " +
-                                    obj.__class__.__name__ + "." + key)
-                    subtest_message(obj.__class__.__name__ + "." +
-                                    key.replace("_True", "") +
-                                    " ok")
-                elif "_False" in key:
-                    self.assertFalse(value, "Check assert: " +
-                                     obj.__class__.__name__ + "." + key)
-                    subtest_message(obj.__class__.__name__ + "." +
-                                    key.replace("_False", "") +
-                                    " ok")
-            self.assertTrue(test_for_True)
-
-        # Test shutdown of CEF
-        cef.Shutdown()
-        subtest_message("cef.Shutdown() ok")
-
-        # Display real number of tests there were run
-        print("\nRan " + str(g_subtests_ran) + " sub-tests in test_main")
-        sys.stdout.flush()
+def js_print(browser, lang, event, msg):
+    # Execute Javascript function "js_print"
+    browser.ExecuteFunction("js_print", lang, event, msg)
 
 
 class GlobalHandler(object):
-    def __init__(self, test_case):
-        self.test_case = test_case
-
-        # Asserts for True/False will be checked just before shutdown
-        self.test_for_True = True  # Test whether asserts are working correctly
-        self.OnAfterCreated_True = False
-
-    def _OnAfterCreated(self, browser, **_):
-        # For asserts that are checked automatically before shutdown its
-        # values should be set first, so that when other asserts fail
-        # (the ones called through the test_case member) they are reported
-        # correctly.
-        self.test_case.assertFalse(self.OnAfterCreated_True)
-        self.OnAfterCreated_True = True
-        self.test_case.assertEqual(browser.GetIdentifier(), 1)
+    def OnAfterCreated(self, browser, **_):
+        """Called after a new browser is created."""
+        # DOM is not yet loaded. Using js_print at this moment will
+        # throw an error: "Uncaught ReferenceError: js_print is not defined".
+        # We make this error on purpose. This error will be intercepted
+        # in DisplayHandler.OnConsoleMessage.
+        js_print(browser, "Python", "OnAfterCreated",
+                 "This will probably never display as DOM is not yet loaded")
+        # Delay print by 0.5 sec, because js_print is not available yet
+        args = [browser, "Python", "OnAfterCreated",
+                "(Delayed) Browser id="+str(browser.GetIdentifier())]
+        threading.Timer(0.5, js_print, args).start()
 
 
 class LoadHandler(object):
-    def __init__(self, test_case):
-        self.test_case = test_case
-        self.frame_source_visitor = None
-
-        # Asserts for True/False will be checked just before shutdown
-        self.test_for_True = True  # Test whether asserts are working correctly
-        self.OnLoadStart_True = False
-        self.OnLoadEnd_True = False
-        self.FrameSourceVisitor_True = False
-        # self.OnLoadingStateChange_Start_True = False # FAILS
-        self.OnLoadingStateChange_End_True = False
-
-    def OnLoadStart(self, browser, frame, **_):
-        self.test_case.assertFalse(self.OnLoadStart_True)
-        self.OnLoadStart_True = True
-        self.test_case.assertEqual(browser.GetUrl(), frame.GetUrl())
-        self.test_case.assertEqual(browser.GetUrl(), g_datauri)
-
-    def OnLoadEnd(self, browser, frame, http_code, **_):
-        # OnLoadEnd should be called only once
-        self.test_case.assertFalse(self.OnLoadEnd_True)
-        self.OnLoadEnd_True = True
-        self.test_case.assertEqual(http_code, 200)
-        self.frame_source_visitor = FrameSourceVisitor(self, self.test_case)
-        frame.GetSource(self.frame_source_visitor)
-        browser.ExecuteJavascript("print('LoadHandler.OnLoadEnd() ok')")
-
-    def OnLoadingStateChange(self, browser, is_loading, can_go_back,
-                             can_go_forward, **_):
-        if is_loading:
-            # TODO: this test fails, looks like OnLoadingStaetChange with
-            #       is_loading=False is being called very fast, before
-            #       OnLoadStart and before client handler is set by calling
-            #       browser.SetClientHandler().
-            #       SOLUTION: allow to set OnLoadingStateChange through
-            #       SetGlobalClientCallback similarly to _OnAfterCreated().
-            # self.test_case.assertFalse(self.OnLoadingStateChange_Start_True)
-            # self.OnLoadingStateChange_Start_True = True
-            pass
-        else:
-            self.test_case.assertFalse(self.OnLoadingStateChange_End_True)
-            self.OnLoadingStateChange_End_True = True
-            self.test_case.assertEqual(browser.CanGoBack(), can_go_back)
-            self.test_case.assertEqual(browser.CanGoForward(), can_go_forward)
+    def OnLoadingStateChange(self, browser, is_loading, **_):
+        """Called when the loading state has changed."""
+        if not is_loading:
+            # Loading is complete. DOM is ready.
+            js_print(browser, "Python", "OnLoadingStateChange",
+                     "Loading is complete")
 
 
 class DisplayHandler(object):
-    def __init__(self, test_case):
-        self.test_case = test_case
-
-        # Asserts for True/False will be checked just before shutdown
-        self.test_for_True = True  # Test whether asserts are working correctly
-        self.javascript_errors_False = False
-        self.OnConsoleMessage_True = False
-
-    def OnConsoleMessage(self, message, **_):
+    def OnConsoleMessage(self, browser, message, **_):
+        """Called to display a console message."""
+        # This will intercept js errors, see comments in OnAfterCreated
         if "error" in message.lower() or "uncaught" in message.lower():
-            self.javascript_errors_False = True
-            raise Exception(message)
-        else:
-            # Check whether messages from javascript are coming
-            self.OnConsoleMessage_True = True
-            subtest_message(message)
-
-
-class FrameSourceVisitor(object):
-    """Visitor for Frame.GetSource()."""
-
-    def __init__(self, load_handler, test_case):
-        self.load_handler = load_handler
-        self.test_case = test_case
-
-    def Visit(self, **_):
-        self.test_case.assertFalse(self.load_handler.FrameSourceVisitor_True)
-        self.load_handler.FrameSourceVisitor_True = True
-        self.test_case.assertIn("747ef3e6011b6a61e6b3c6e54bdd2dee",
-                                g_datauri_data)
+            # Prevent infinite recurrence in case something went wrong
+            if "js_print is not defined" in message.lower():
+                if hasattr(self, "js_print_is_not_defined"):
+                    print("Python: OnConsoleMessage: "
+                          "Intercepted Javascript error: "+message)
+                    return
+                else:
+                    self.js_print_is_not_defined = True
+            # Delay print by 0.5 sec, because js_print may not be
+            # available yet due to DOM not ready.
+            args = [browser, "Python", "OnConsoleMessage",
+                    "(Delayed) Intercepted Javascript error: <i>{error}</i>"
+                    .format(error=message)]
+            threading.Timer(0.5, js_print, args).start()
 
 
 class External(object):
-    """Javascript 'window.external' object."""
+    def __init__(self, browser):
+        self.browser = browser
 
-    def __init__(self, test_case):
-        self.test_case = test_case
-
-        # Test binding properties to the 'window' object.
-        self.test_property1 = "Test binding property to the 'window' object"
-        self.test_property2 = {"key1": self.test_property1,
-                               "key2": ["Inside list", 1, 2]}
-
-        # Asserts for True/False will be checked just before shutdown
-        self.test_for_True = True  # Test whether asserts are working correctly
-        self.test_function_True = False
-        self.test_callbacks_True = False
-        self.py_callback_True = False
-
-    def test_function(self):
-        """Test binding function to the 'window' object."""
-        self.test_function_True = True
-
-    def test_callbacks(self, js_callback):
+    def test_multiple_callbacks(self, js_callback):
         """Test both javascript and python callbacks."""
+        js_print(self.browser, "Python", "test_multiple_callbacks",
+                 "Called from Javascript. Will call Javascript callback now.")
+
         def py_callback(msg_from_js):
-            self.py_callback_True = True
-            self.test_case.assertEqual(msg_from_js,
-                                       "String sent from Javascript")
-        self.test_callbacks_True = True
+            js_print(self.browser, "Python", "py_callback", msg_from_js)
         js_callback.Call("String sent from Python", py_callback)
 
 
-if __name__ == "__main__":
-    _test_runner.main(basename(__file__))
+if __name__ == '__main__':
+    main()

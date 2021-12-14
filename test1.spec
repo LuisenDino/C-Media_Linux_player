@@ -4,12 +4,12 @@
 block_cipher = None
 
 
-a = Analysis(['App/App.py'],
-             pathex=["/home/luis/.local/lib/python3.7/site-packages/cv2"],
+a = Analysis(['test1.py'],
+             pathex=[],
              binaries=[],
-             datas=[("/home/luis/Escritorio/C-Media_Linux_player/App/Media", "Media")],
+             datas=[],
              hiddenimports=[],
-             hookspath=['.'],
+             hookspath=["."],
              hooksconfig={},
              runtime_hooks=[],
              excludes=[],
@@ -21,26 +21,20 @@ pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
 exe = EXE(pyz,
-          a.scripts, 
+          a.scripts,
+          a.binaries,
+          a.zipfiles,
+          a.datas,  
           [],
-          exclude_binaries=True,
-          name='C-Media Player Linux v1.0',
+          name='test1',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
+          upx_exclude=[],
+          runtime_tmpdir=None,
           console=True,
           disable_windowed_traceback=False,
           target_arch=None,
           codesign_identity=None,
-          entitlements_file=None,
-          icon="/home/luis/Descargas/C-MediaRecursos/CmediaPlayer.ico"          
-          )
-coll = COLLECT(exe,
-               a.binaries,
-               a.zipfiles,
-               a.datas, 
-               strip=False,
-               upx=True,
-               upx_exclude=[],
-               name='App')
+          entitlements_file=None )

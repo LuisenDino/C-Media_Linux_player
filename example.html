@@ -9,7 +9,7 @@
     <script>
 
         function send_text(){   
-                window.api.printer.imprimir(document.getElementById("texto").value);
+               window.api.printer.imprimir(document.getElementById("texto").value, "/home/luis/Escritorio/C-Media_Linux_player/App/Media/logo_ciel.bmp");
         }
 
         function get_paper(){
@@ -24,6 +24,38 @@
             }
             
         }
+
+        function get_cedula(){
+            try{
+                window.api.code_reader.get_result().then(function(response){
+                    ced = document.getElementById("cedula");
+                    ced.innerHTML = '<button id="get_cedula", onclick="get_cedula()">Obtener Cedula</button>'
+                    if(typeof response == "object"){
+                        table = document.createElement("table");
+                        tbody = document.createElement("tbody");
+                        Object.keys(response).forEach(function(element){
+                            trow = document.createElement("tr");
+                            th = document.createElement("th");
+                            th.innerHTML = element;
+                            cedula = document.createElement("td")
+                            cedula.innerHTML = response[element]
+                            trow.appendChild(th)
+                            trow.appendChild(cedula)
+                            tbody.appendChild(trow)
+                        })
+
+                        table.appendChild(tbody)
+                        ced.appendChild(table)
+                    }else{
+                        p = document.createElement("p")
+                        p.innerHTML = response
+                        ced.appendChild(p)
+                    }
+                })}
+            catch(error){
+                document.getElementById("paper_state").innerHTML = error; 
+            }
+        }
     </script>
     <h1>Hola Mundo!</h1>
     <div>
@@ -34,5 +66,9 @@
         <p id="paper_state">Hola</p>
         <button id="paper", onclick="get_paper()">Estado del papel</button>
     </div>
+    <div id="cedula">
+        <button id="get_cedula", onclick="get_cedula()">Obtener Cedula</button>
+    </div>
+
 </body>
 </html>

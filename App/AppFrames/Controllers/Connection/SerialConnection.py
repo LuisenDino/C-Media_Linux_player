@@ -50,7 +50,7 @@ class SerialConnection():
         :return: array. Conjunto de bytes con informacion leidos en el puerto USB. 
         """
         try:
-            return self.device.readline()
+            return self.device.read()
         except Exception as e:
             logging.error(str(e))
             return str(e)
