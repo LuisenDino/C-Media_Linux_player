@@ -78,6 +78,17 @@ class UsbConnection():
             logging.error(str(e))
             return str(e)
 
+    def read_line(self):
+        """
+        La funcion lee una cantidad de bytes del puerto USB.
+        :return: array. Conjunto de bytes con informacion leidos en el puerto USB. 
+        """
+        try:
+            return self.device.read_line(self.ep_in, self.timeout)
+        except Exception as e:
+            logging.error(str(e))
+            return str(e)
+        
     def read(self):
         """
         La funcion lee una cantidad de bytes del puerto USB.
@@ -88,4 +99,3 @@ class UsbConnection():
         except Exception as e:
             logging.error(str(e))
             return str(e)
-        

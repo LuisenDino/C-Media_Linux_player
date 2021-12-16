@@ -6,10 +6,10 @@ block_cipher = None
 
 a = Analysis(['App/App.py'],
              pathex=["/home/luis/.local/lib/python3.7/site-packages/cv2"],
-             binaries=[],
-             datas=[("/home/luis/Escritorio/C-Media_Linux_player/App/Media", "Media")],
+             binaries=[("/home/luis/.local/lib/python3.7/site-packages/cefpython3/libcef.so", ".")],
+             datas=[("/home/luis/Escritorio/C-Media_Linux_player/App/Media", "App/Media")],
              hiddenimports=[],
-             hookspath=['.'],
+             hookspath=["."],
              hooksconfig={},
              runtime_hooks=[],
              excludes=[],

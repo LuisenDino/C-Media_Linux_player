@@ -1,13 +1,13 @@
 
 import tkinter as tk
-from ConfigGUI.MainFrame import MainFrame
+from App.ConfigGUI.MainFrame import MainFrame
 
 def main():
     """
     Funcion de inicio de la aplicacion en modo de configuracion
     """
     root = tk.Tk()
-    icon = tk.PhotoImage(file='App/Media/LOGO-CMedia.png')   
+    icon = tk.PhotoImage(file='Media/LOGO-CMedia.png')   
     root.tk.call('wm', 'iconphoto', root._w, icon)
     root.title("C-Media Player - Configuración")
     #root.geometry("485x360")

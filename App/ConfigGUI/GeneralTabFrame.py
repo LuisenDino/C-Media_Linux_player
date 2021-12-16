@@ -67,7 +67,7 @@ class GeneralTabFrame(tk.Frame):
         tk.Button(self,text="Guardar", command=self.save).grid(column=0, row=5, columnspan=7)
 
         #Imagen
-        img = tk.PhotoImage(file="App/Media/cog_edit.png")
+        img = tk.PhotoImage(file="Media/cog_edit.png")
         tk.Label(self, image=img, bg="#eef1f2").grid(row = 6, column = 7, sticky="e", pady=5)
 
     
@@ -81,7 +81,7 @@ class GeneralTabFrame(tk.Frame):
         """
         Guarda la informacion en el archivo json de configuracion
         """
-        with open("App/Media/config.json", "w") as file:
+        with open("Media/config.json", "w") as file:
             settings = {
                 "Ruta" : self.file_name.get(),
                 "PantallaCompleta" : self.fullscreen.get(), 
@@ -99,5 +99,5 @@ class GeneralTabFrame(tk.Frame):
         """
         Obtiene la configuracion del archivo json y las guarda en un atributo de la clase
         """
-        with open("App/Media/config.json", "r") as file:
+        with open("Media/config.json", "r") as file:
             self.settings = json.loads(file.read())

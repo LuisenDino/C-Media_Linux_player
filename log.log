@@ -1,0 +1,6 @@
+12/16/2021 04:40:40 PM:ERROR:cannot import name 'main' from 'Player' (/home/luis/Escritorio/C-Media_Linux_player/App/Player.py)
+12/16/2021 04:40:40 PM:ERROR:name 'main' is not defined
+12/16/2021 04:42:57 PM:ERROR:cannot import name 'main' from 'Player' (/home/luis/Escritorio/C-Media_Linux_player/App/Player.py)
+12/16/2021 04:42:57 PM:ERROR:name 'main' is not defined
+12/16/2021 04:43:41 PM:ERROR:[Errno 2] No such file or directory: '/home/luis/Escritorio/C-Media_Linux_player/Media/config.json'
+12/16/2021 04:51:35 PM:ERROR:Object of type bytearray is not JSON serializable
