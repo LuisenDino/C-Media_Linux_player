@@ -27,7 +27,7 @@ def main():
         root.overrideredirect(1)    
     root.geometry(str(sett["AnchoRequerido"])+"x"+str(sett["AltoRequerido"])+"+"+str(sett["LeftRequerido"])+"+"+str(sett["TopRequerido"]))
 
-    path = solve_path('Media/LOGO-CMedia.png') 
+    path = 'Media/LOGO-CMedia.png' 
     icon = tk.PhotoImage(file=path)   
     root.tk.call('wm', 'iconphoto', root._w, icon)
 
@@ -58,7 +58,7 @@ def get_sett():
     Obtiene la informacion de configuracion de la aplicacion
     :return: dic. Configuracion extraida del archivo json
     """
-    path = solve_path("Media/config.json") 
+    path = "Media/config.json"
     try:
         with open(path, "r") as file:
             sett = json.load(file)

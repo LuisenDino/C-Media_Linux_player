@@ -24,28 +24,32 @@ class BarCodeReader():
             self.reader = SerialConnection(self.device["port"]) #/dev/ttyACM0
         except Exception as e:
             logging.error(str(e))
-            print(str(e))
             return str(e)
         
-        if(self.thread == None):
+        if(self.thread == None and self.reader.device):
             self.thread = threading.Thread(target=self.receiveData)
             self.thread.start()
             
         
     def receiveData(self):
-        while not self.killThread:
-            
-            try:
-                b = self.reader.read() 
-            except Exception as e:
-                print(str(e))
-            if(self.killThread):
-                break
-            byte = bytearray()
-            while  b != b"\r" and not self.killThread:
-                byte+=b
-                b = self.reader.read()
-            self.procesar_datos(byte[0], byte[1:])
+        print(self.reader.device)
+        if self.reader.device:
+            while not self.killThread:
+                try:
+                    b = self.reader.read() 
+                except Exception as e:
+                    logging.error(str(e)) 
+                if(self.killThread):
+                    break
+                byte = bytearray()
+                while  b != b"\r" and not self.killThread:
+                    byte+=b
+                    b = self.reader.read()
+                try:
+                    self.procesar_datos(byte[0], byte[1:])
+                except Exception as e:
+                    logging.error(str(e))
+                    self.result = bytes(byte[1:])
             
 
     def procesar_datos(self, prefix, byte):
@@ -269,9 +273,12 @@ class BarCodeReader():
         return string
 
     def disconnect (self):
+        
         self.killThread = True
-        self.reader.device.cancel_read()
-        self.thread.join()
+        if self.reader.device:
+            self.reader.device.cancel_read()
+        if self.thread:
+            self.thread.join()
         
     def clear_result(self):
         self.result = None

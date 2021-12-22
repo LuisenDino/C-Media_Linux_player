@@ -9,11 +9,11 @@ if len(sys.argv) == 1:
     try:
         Player.main()
     except Exception as e:
-        logging(str(e))
+        logging.error(str(e))
 elif "--config" in sys.argv:
     try:
         Configuration.main()
     except Exception as e:
-        logging(str(e))
+        logging.error(str(e))
 else:
     logging.error("Opcion no permitida")

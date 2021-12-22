@@ -3,6 +3,7 @@ from tkinter import Variable, ttk
 import json
 from tkinter.filedialog import askopenfilename
 from .ToggleButton import ToggleButton
+import logging
 
 class GeneralTabFrame(tk.Frame):
     """
@@ -67,8 +68,12 @@ class GeneralTabFrame(tk.Frame):
         tk.Button(self,text="Guardar", command=self.save).grid(column=0, row=5, columnspan=7)
 
         #Imagen
-        img = tk.PhotoImage(file="Media/cog_edit.png")
-        tk.Label(self, image=img, bg="#eef1f2").grid(row = 6, column = 7, sticky="e", pady=5)
+        try:
+            img = tk.PhotoImage(file="Media/cog_edit.png")
+            tk.Label(self, image=img, bg="#eef1f2").grid(row = 6, column = 7, sticky="e", pady=5)
+        except Exception as e:
+            print(str(e))
+            logging.error(str(e))
 
     
     def select_file(self):

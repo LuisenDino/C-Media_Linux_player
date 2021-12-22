@@ -41,8 +41,8 @@ class UsbConnection():
         self.device = usb.core.find(idVendor = self.id_vendor, idProduct = self.id_product)
 
         if self.device is None:
-            logging.warning("Equipo no encontrado")
-            return "Equipo no encontrado"
+            logging.warning("Impresora no encontrado")
+            return "Impresora no encontrado"
 
         ep = self.device[0].interfaces()[0].endpoints() 
 
@@ -72,30 +72,33 @@ class UsbConnection():
         La funcion escribe un conjunto de bytes en el puerto USB.
         :param data: bytearray. Conjunto de bytes a escribir en el puertp USB.
         """
-        try:
-            self.device.write(self.ep_out, data, timeout = self.timeout)
-        except Exception as e:
-            logging.error(str(e))
-            return str(e)
+        if self.device:
+            try:
+                return self.device.write(self.ep_out, data, timeout = self.timeout)
+            except Exception as e:
+                logging.error(str(e))
+                return str(e)
 
     def read_line(self):
         """
         La funcion lee una cantidad de bytes del puerto USB.
         :return: array. Conjunto de bytes con informacion leidos en el puerto USB. 
         """
-        try:
-            return self.device.read_line(self.ep_in, self.timeout)
-        except Exception as e:
-            logging.error(str(e))
-            return str(e)
+        if self.device:
+            try:
+                return self.device.read_line(self.ep_in, self.timeout)
+            except Exception as e:
+                logging.error(str(e))
+                return str(e)
         
     def read(self):
         """
         La funcion lee una cantidad de bytes del puerto USB.
         :return: array. Conjunto de bytes con informacion leidos en el puerto USB. 
         """
-        try:
-            return self.device.read(self.ep_in, self.timeout)
-        except Exception as e:
-            logging.error(str(e))
-            return str(e)
+        if self.device:
+            try:
+                return self.device.read(self.ep_in, self.timeout)
+            except Exception as e:
+                logging.error(str(e))
+                return str(e)

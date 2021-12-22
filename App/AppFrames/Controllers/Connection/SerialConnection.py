@@ -18,6 +18,7 @@ class SerialConnection():
         self.port = port
         self.timeout = timeout
         self.baudrate = baudrate
+        self.device = None
         self.connect()
 
 
@@ -38,40 +39,44 @@ class SerialConnection():
         La funcion escribe un conjunto de bytes en el puerto USB.
         :param data: bytearray. Conjunto de bytes a escribir en el puertp USB.
         """
-        try:
-            self.device.write(data)
-        except Exception as e:
-            logging.error(str(e))
-            return str(e)
+        if self.device:
+            try:
+                self.device.write(data)
+            except Exception as e:
+                logging.error(str(e))
+                return str(e)
 
     def read(self):
         """
         La funcion lee una cantidad de bytes del puerto USB.
         :return: array. Conjunto de bytes con informacion leidos en el puerto USB. 
         """
-        try:
-            return self.device.read()
-        except Exception as e:
-            logging.error(str(e))
-            return str(e)
+        if self.device:
+            try:
+                return self.device.read()
+            except Exception as e:
+                logging.error(str(e))
+                return str(e)
 
     def read_line(self):
         """
         La funcion lee una cantidad de bytes del puerto USB.
         :return: array. Conjunto de bytes con informacion leidos en el puerto USB. 
         """
-        try:
-            return self.device.readline()
-        except Exception as e:
-            logging.error(str(e))
-            return str(e)
+        if self.device:
+            try:
+                return self.device.readline()
+            except Exception as e:
+                logging.error(str(e))
+                return str(e)
 
     def diconnect(self):
         """
         La funcion cierra la conexion con el puerto serial
         """
-        try:
-            self.device.close()
-        except Exception as e:
-            logging.error(str(e))
-            return str(e)
+        if self.device:
+            try:
+                self.device.close()
+            except Exception as e:
+                logging.error(str(e))
+                return str(e)
