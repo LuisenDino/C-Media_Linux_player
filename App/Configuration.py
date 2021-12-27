@@ -1,8 +1,15 @@
 from tkinter import messagebox
 import tkinter as tk
+#from ConfigGUI.MainFrame import MainFrame
 from App.ConfigGUI.MainFrame import MainFrame
-import pathlib
 import logging
+import sys
+import os
+
+def solve_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath('.'), relative_path)
 
 def main():
     """
@@ -12,7 +19,8 @@ def main():
     
     root = tk.Tk()
     try:
-        icon = tk.PhotoImage(file='Media/LOGO-CMedia.png')   
+        path = solve_path('Media/LOGO-CMedia.png')
+        icon = tk.PhotoImage(file=path)   
         root.tk.call('wm', 'iconphoto', root._w, icon)
     except Exception as e:
         logging.error(str(e))

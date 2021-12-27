@@ -2,14 +2,23 @@ import tkinter as tk
 from tkinter import Variable, ttk
 import json
 from tkinter.filedialog import askopenfilename
+
 from .ToggleButton import ToggleButton
 import logging
+import sys
+import os
+
+def solve_path(relative_path):
+        if hasattr(sys, '_MEIPASS'):
+            return os.path.join(sys._MEIPASS, relative_path)
+        return os.path.join(os.path.abspath('.'), relative_path)
 
 class GeneralTabFrame(tk.Frame):
     """
     Clase de vista de configuracion General
     :param parent: tk.Frame. vista padre.
-    """
+    """ 
+
     def __init__(self, parent):
         """
         Constructor de clase
@@ -69,7 +78,8 @@ class GeneralTabFrame(tk.Frame):
 
         #Imagen
         try:
-            img = tk.PhotoImage(file="Media/cog_edit.png")
+            path = solve_path("Media/cog_edit.png")
+            img = tk.PhotoImage(file=path)
             tk.Label(self, image=img, bg="#eef1f2").grid(row = 6, column = 7, sticky="e", pady=5)
         except Exception as e:
             print(str(e))
@@ -86,7 +96,8 @@ class GeneralTabFrame(tk.Frame):
         """
         Guarda la informacion en el archivo json de configuracion
         """
-        with open("Media/config.json", "w") as file:
+        path = solve_path("Media/config.json")
+        with open(path, "w") as file:
             settings = {
                 "Ruta" : self.file_name.get(),
                 "PantallaCompleta" : self.fullscreen.get(), 
@@ -104,5 +115,6 @@ class GeneralTabFrame(tk.Frame):
         """
         Obtiene la configuracion del archivo json y las guarda en un atributo de la clase
         """
-        with open("Media/config.json", "r") as file:
+        path = solve_path("Media/config.json")
+        with open(path, "r") as file:
             self.settings = json.loads(file.read())

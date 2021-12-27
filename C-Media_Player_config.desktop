@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=C-Media Player Linux v1.0 configuration
+Comment=Player de C-Media desarollado para Linux.
+TryExec=/home/luis/Escritorio/C-Media_Linux_player/dist/App/App
+Exec=/home/luis/Escritorio/C-Media_Linux_player/dist/App/App --config
+Icon=/home/luis/Descargas/C-MediaRecursos/CmediaPlayer.ico
+Terminal=false
+Keywords=config;configuracion;c-media;media
+MimeType=x-scheme-handler/CMedia;
+X-GNOME-UsesNotifications=true;
+

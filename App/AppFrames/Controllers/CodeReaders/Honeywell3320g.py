@@ -32,7 +32,6 @@ class BarCodeReader():
             
         
     def receiveData(self):
-        print(self.reader.device)
         if self.reader.device:
             while not self.killThread:
                 try:
@@ -42,19 +41,26 @@ class BarCodeReader():
                 if(self.killThread):
                     break
                 byte = bytearray()
-                while  b != b"\r" and not self.killThread:
-                    byte+=b
+                byte+=b
+                while (not self.killThread) and (b != b"\r" or byte[-1] != ord("\r")):
                     b = self.reader.read()
+                    byte+=b
+                self.procesar_datos(byte[0], byte[1:])
                 try:
-                    self.procesar_datos(byte[0], byte[1:])
+                    pass
                 except Exception as e:
                     logging.error(str(e))
                     self.result = bytes(byte[1:])
             
 
     def procesar_datos(self, prefix, byte):
+        
         if(prefix != 114):
-            self.result = byte.decode("utf-8")
+            try:
+                result = byte.decode("utf-8")
+                self.result = result
+            except:
+                return
         else:
             cedula = {}
             if(byte[32:34] == b"CE"):
@@ -257,7 +263,7 @@ class BarCodeReader():
                 cedula["Pais"] = "COL"
             self.result = cedula
             return cedula
-            
+        
 
     def replaces(self, byte):
         for i in range(len(byte)):

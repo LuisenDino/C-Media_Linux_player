@@ -1,5 +1,7 @@
 import sys
 import logging
+#import Player
+#import Configuration
 from App import Player
 from App import Configuration
 

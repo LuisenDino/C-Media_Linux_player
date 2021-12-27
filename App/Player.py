@@ -1,4 +1,5 @@
 import logging
+#from AppFrames.MainFrame import MainFrame
 from App.AppFrames.MainFrame import MainFrame
 import json
 import tkinter as tk
@@ -26,10 +27,12 @@ def main():
     if not(sett["MostrarBordeVentana"]):
         root.overrideredirect(1)    
     root.geometry(str(sett["AnchoRequerido"])+"x"+str(sett["AltoRequerido"])+"+"+str(sett["LeftRequerido"])+"+"+str(sett["TopRequerido"]))
-
-    path = 'Media/LOGO-CMedia.png' 
-    icon = tk.PhotoImage(file=path)   
-    root.tk.call('wm', 'iconphoto', root._w, icon)
+    try:
+        path = solve_path('Media/LOGO-CMedia.png')
+        icon = tk.PhotoImage(file=path)   
+        root.tk.call('wm', 'iconphoto', root._w, icon)
+    except Exception as e:
+        logging.error(str(e))
 
     for pantalla in screen_config["Pantallas"]:
         pantallas[pantalla["ScreenNumber"]] = MainFrame(root, pantalla["Controles"])
@@ -58,7 +61,8 @@ def get_sett():
     Obtiene la informacion de configuracion de la aplicacion
     :return: dic. Configuracion extraida del archivo json
     """
-    path = "Media/config.json"
+    path = solve_path("Media/config.json")
+    #path = solve_path("Media/config.json")
     try:
         with open(path, "r") as file:
             sett = json.load(file)

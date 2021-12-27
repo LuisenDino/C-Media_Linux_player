@@ -4,3 +4,43 @@
 12/16/2021 04:42:57 PM:ERROR:name 'main' is not defined
 12/16/2021 04:43:41 PM:ERROR:[Errno 2] No such file or directory: '/home/luis/Escritorio/C-Media_Linux_player/Media/config.json'
 12/16/2021 04:51:35 PM:ERROR:Object of type bytearray is not JSON serializable
+12/27/2021 04:13:39 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:13:39 PM:ERROR:[Errno 13] could not open port /dev/ttyACM0: [Errno 13] Permission denied: '/dev/ttyACM0'
+12/27/2021 04:13:41 PM:ERROR:[Errno 13] Access denied (insufficient permissions)
+12/27/2021 04:13:45 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:13:45 PM:ERROR:[Errno 13] could not open port /dev/ttyACM0: [Errno 13] Permission denied: '/dev/ttyACM0'
+12/27/2021 04:13:45 PM:ERROR:[Errno 13] Access denied (insufficient permissions)
+12/27/2021 04:14:17 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:14:18 PM:ERROR:[Errno 13] Access denied (insufficient permissions)
+12/27/2021 04:14:50 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:17:49 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:18:35 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:19:04 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:19:37 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:20:18 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:22:13 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:23:41 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:24:21 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:25:04 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:25:15 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:25:19 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:25:50 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:26:35 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:27:19 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:27:56 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:27:56 PM:ERROR:unexpected indent (Honeywell3320g.py, line 50)
+12/27/2021 04:28:21 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:29:02 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:30:01 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:31:02 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:32:14 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:47:18 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:58:32 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:58:32 PM:ERROR:[Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+12/27/2021 04:58:39 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 04:58:39 PM:ERROR:[Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+12/27/2021 05:36:30 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 05:36:47 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 05:36:47 PM:ERROR:[Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+12/27/2021 05:37:07 PM:ERROR:couldn't open "/home/luis/Escritorio/C-Media_Linux_player/Media/LOGO-CMedia.png": no such file or directory
+12/27/2021 05:37:07 PM:ERROR:[Errno 13] could not open port /dev/ttyACM0: [Errno 13] Permission denied: '/dev/ttyACM0'

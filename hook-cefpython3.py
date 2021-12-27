@@ -14,13 +14,14 @@ import sys
 import PyInstaller
 from PyInstaller.utils.hooks import is_module_satisfies, get_package_paths
 from PyInstaller.compat import is_win, is_darwin, is_linux
-is_py2 = False
 from PyInstaller import log as logging
 try:
     # PyInstaller >= 4.0 doesn't support Python 2.7
     from PyInstaller.compat import is_py2
 except ImportError:
     is_py2 = None
+
+is_py2 = False
 
 # Constants
 CEFPYTHON_MIN_VERSION = "57.0"
