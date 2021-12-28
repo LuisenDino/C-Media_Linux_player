@@ -3,11 +3,10 @@ Version=1.0
 Type=Application
 Name=C-Media Player Linux v1.0
 Comment=Player de C-Media desarollado para Linux.
-TryExec=/home/luis/Escritorio/C-Media_Linux_player/dist/App/App
-Exec=sudo /home/luis/Escritorio/C-Media_Linux_player/dist/App/App
-Icon=/home/luis/Descargas/C-MediaRecursos/CmediaPlayer.ico
+TryExec= C-Media_Player
+Exec= C-Media_Player %U
+Icon= CmediaPlayer
 Terminal=false
 MimeType=x-scheme-handler/CMedia;
 Keywords=c-media;player;media
 X-GNOME-UsesNotifications=true;
-

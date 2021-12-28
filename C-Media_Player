@@ -1,0 +1,11 @@
+#!/bin/sh
+
+SCRIPT=$(readlink -f "$0")
+USR_DIRECTORY=$(readlink -f $(dirname $SCRIPT)/..)
+
+CMEDIA_PATH="$USR_DIRECTORY/share/C-Media_Player/C-Media_Player"
+CMEDIA_LOGS="$HOME/.config/Ciel/C-Media/logs"
+
+mkdir -p "$CMEDIA_LOGS"
+
+"$CMEDIA_PATH" "$@"
