@@ -8,10 +8,6 @@ import logging
 import sys
 import os
 
-def solve_path(relative_path):
-        if hasattr(sys, '_MEIPASS'):
-            return os.path.join(sys._MEIPASS, relative_path)
-        return os.path.join(os.path.abspath('.'), relative_path)
 
 class GeneralTabFrame(tk.Frame):
     """
@@ -78,9 +74,9 @@ class GeneralTabFrame(tk.Frame):
 
         #Imagen
         try:
-            path = solve_path("Media/cog_edit.png")
-            img = tk.PhotoImage(file=path)
-            tk.Label(self, image=img, bg="#eef1f2").grid(row = 6, column = 7, sticky="e", pady=5)
+            path = os.path.expanduser('~')+"/.config/Ciel/C-Media_Player/Media/cog_edit.png"
+            self.img = tk.PhotoImage(file=path)
+            tk.Label(self, image=self.img, bg="#eef1f2").grid(row = 6, column = 7, sticky="e", pady=5)
         except Exception as e:
             print(str(e))
             logging.error(str(e))
@@ -96,7 +92,7 @@ class GeneralTabFrame(tk.Frame):
         """
         Guarda la informacion en el archivo json de configuracion
         """
-        path = solve_path("Media/config.json")
+        path = os.path.expanduser('~')+"/.config/Ciel/C-Media_Player/configs/config.json"
         with open(path, "w") as file:
             settings = {
                 "Ruta" : self.file_name.get(),
@@ -115,6 +111,7 @@ class GeneralTabFrame(tk.Frame):
         """
         Obtiene la configuracion del archivo json y las guarda en un atributo de la clase
         """
-        path = solve_path("Media/config.json")
+
+        path = os.path.expanduser('~')+"/.config/Ciel/C-Media_Player/configs/config.json"
         with open(path, "r") as file:
             self.settings = json.loads(file.read())

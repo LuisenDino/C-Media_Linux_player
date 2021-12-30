@@ -1,0 +1,1 @@
+NAME="bus/usb/[0-9]*", KERNEL == "[0-9]*", GROUP="dialout"

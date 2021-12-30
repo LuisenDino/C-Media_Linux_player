@@ -4,8 +4,9 @@ import logging
 #import Configuration
 from App import Player
 from App import Configuration
+import os
 
-logging.basicConfig(filename="log.log", level=logging.DEBUG, format=("%(asctime)s:%(levelname)s:%(message)s"), datefmt="%m/%d/%Y %I:%M:%S %p")
+logging.basicConfig(filename=os.path.expanduser('~')+"/.config/Ciel/C-Media_Player/logs/log.log", level=logging.DEBUG, format=("%(asctime)s:%(levelname)s:%(message)s"), datefmt="%m/%d/%Y %I:%M:%S %p")
 
 if len(sys.argv) == 1:
     try:

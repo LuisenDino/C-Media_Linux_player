@@ -4,8 +4,9 @@ SCRIPT=$(readlink -f "$0")
 USR_DIRECTORY=$(readlink -f $(dirname $SCRIPT)/..)
 
 CMEDIA_PATH="$USR_DIRECTORY/share/C-Media_Player/C-Media_Player"
-CMEDIA_LOGS="$HOME/.config/Ciel/C-Media/logs"
+CMEDIA_LOGS="$HOME/.config/Ciel/C-Media_Player/logs"
 
 mkdir -p "$CMEDIA_LOGS"
 
-"$CMEDIA_PATH" "$@"
+
+nohup "$CMEDIA_PATH" "$@"
