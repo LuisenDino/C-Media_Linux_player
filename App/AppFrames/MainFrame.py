@@ -1,4 +1,5 @@
 import logging
+import threading
 import tkinter as tk
 import sys
 
@@ -31,7 +32,7 @@ class MainFrame(tk.Frame):
         self.bind("<Configure>", self.on_configure)
         
         self.apis = {}
-
+        
         for controller in controllers:
             #PrinterFrame
             if "Control.Impresion.dll" in controller["NombreArchivo"]:
@@ -41,10 +42,9 @@ class MainFrame(tk.Frame):
             elif "Control.NavegadorWebChrome.dll" in controller["NombreArchivo"]:
                 self.webview_frame = WebViewFrame(self, url=controller["ObjetoBase"]["UrlInicio"])
                 self.webview_frame.grid(row=1, column=0,sticky=(tk.N + tk.S + tk.E + tk.W))
-            elif "Control.CodeReader.dll" in controller["NombreArchivo"]:
-                self.code_reader_frame = CodeReaderFrame(None)
+            elif "Control.Captura.CodigoBarras.Omnidireccional.Honeywell.dll" in controller["NombreArchivo"]:
+                self.code_reader_frame = CodeReaderFrame(controller["ObjetoBase"])
                 self.apis["code_reader"] = self.code_reader_frame.get_code_reader()
-
         tk.Grid.rowconfigure(self, 1, weight=1)
         tk.Grid.columnconfigure(self, 0, weight=1)
         self.pack(fill=tk.BOTH, expand=tk.YES)
@@ -53,7 +53,8 @@ class MainFrame(tk.Frame):
                 cef.Initialize()
             except Exception as e :
                 logging.error(str(e))
-                return e
+                return e  
+        
 
     def on_close(self):
         """
@@ -105,3 +106,5 @@ class MainFrame(tk.Frame):
         
     def get_code_reader_frame(self):
         return self.code_reader_frame
+
+    

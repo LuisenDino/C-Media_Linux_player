@@ -1,4 +1,5 @@
 import logging
+import threading
 import tkinter as tk #Librería GUI
 from cefpython3 import cefpython as cef #Librería Chromium Embeded Framework
 from .JSBridge import JSBridge #Clase que permite la interaccipn entre la url y la aplicacion local
@@ -19,6 +20,7 @@ class WebViewFrame(tk.Frame):
         """
         self.closing = False
         self.browser = None
+        self.kill_thread = False
 
         self.url = url
         tk.Frame.__init__(self, parent)
@@ -82,7 +84,8 @@ class WebViewFrame(tk.Frame):
         """
         if self.browser:    
             self.js_bridge = JSBridge(self.browser, apis)
-            self.browser.SetClientHandler(LoadHandler(self.js_bridge.parse_api_js()))
+            self.thread = threading.Thread(target=lambda:self.run_events(apis))
+            self.browser.SetClientHandler(LoadHandler(self.js_bridge.parse_api_js(), self.thread))
             bindings = cef.JavascriptBindings(bindToFrames=True, bindToPopups=True)
             bindings.SetObject("external", self.js_bridge)
             self.browser.SetJavascriptBindings(bindings)
@@ -92,8 +95,10 @@ class WebViewFrame(tk.Frame):
         Llamada al cerrar la aplicacion superior
         """
         if self.browser:
+            self.kill()
             self.browser.CloseBrowser(True)
             self.clear_browser_references()
+            
     
     def clear_browser_references(self):
         """
@@ -101,17 +106,35 @@ class WebViewFrame(tk.Frame):
         """
         self.browser = None
 
+
+    def run_events(self, apis):
+        while not self.kill_thread:
+            for controller  in apis.values():
+                event = controller.get_event()
+                
+                if event.get() and self.browser:
+                    js = "Ciel.MPC.WebPlayer.Controles."+event.nombre_js+"."+event.function+"("+",".join(event.params)+")"
+                    print(js)
+                    self.browser.ExecuteJavascript(js)
+                    controller.clear_event()
+
+    def kill(self):
+        self.kill_thread = True
+
+
+
 class LoadHandler(object):
     """
     Clase de manejo de carga del navegador
     :param script: str. script de inicio del navegador
     """
-    def __init__(self, script):
+    def __init__(self, script, thread):
         """
         Constructor de clase
         :param script: str. script de inicio del navegador
         """
         self.script = script
+        self.thread = thread
 
 
     def OnLoadingStateChange(self, browser, is_loading, **_):
@@ -124,3 +147,5 @@ class LoadHandler(object):
         if not is_loading:
             browser.GetJavascriptBindings().Rebind()
             browser.ExecuteJavascript(self.script)
+            
+            self.thread.start()  

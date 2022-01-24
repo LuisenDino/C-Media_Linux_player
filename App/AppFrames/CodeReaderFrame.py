@@ -1,5 +1,5 @@
 import tkinter as tk
-
+from tkinter import messagebox
 
 class CodeReaderFrame(tk.Frame):
     def __init__(self, settings):
@@ -10,7 +10,7 @@ class CodeReaderFrame(tk.Frame):
         
         from .Controllers.CodeReaders.Honeywell3320g import BarCodeReader
         
-        self.code_reader = BarCodeReader({"port":"/dev/ttyACM0"})
+        self.code_reader = BarCodeReader(settings["PuertoSerial"])
 
     def get_code_reader(self):
         """

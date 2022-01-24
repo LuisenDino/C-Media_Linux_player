@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 
 class PrinterFrame(tk.Frame):
     """
@@ -15,7 +16,10 @@ class PrinterFrame(tk.Frame):
             from .Controllers.Printers.TM_T88V import Printer
         else:
             raise Exception("No existe controlador para la impresora seleccionada")
-        self.printer = Printer({"id_vendor":"0x04b8", "id_product": "0x0202"}, True)
+        self.printer = Printer(settings["PuertoSerial"])
+        
+        if self.printer.printer:
+            self.printer.cargar(settings["RutaLogo"]["Path"])
 
     def get_printer(self):
         """

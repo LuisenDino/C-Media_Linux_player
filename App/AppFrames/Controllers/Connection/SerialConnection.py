@@ -1,5 +1,6 @@
 import serial #libreria que permite la conexion con puerto serial
 import logging #libreria de logging
+from serial.serialutil import PARITY_NAMES
 
 class SerialConnection():
     """
@@ -8,7 +9,7 @@ class SerialConnection():
     :param timeout: int. Opcional. Limite de tiempo.
     :param baudrate: tasa de baudios.
     """
-    def __init__(self, port, timeout = 2000, baudrate = 9600):
+    def __init__(self, port, timeout = 2000, baudrate = 9600, bytesize=8, parity=0,stopbits = 1 ):
         """
         La funcion es el constructor de la clase UsbConnection.
         :param port: string. Ubicacion del archivo del puerto
@@ -16,9 +17,14 @@ class SerialConnection():
         :param baudrate: tasa de baudios.
         """
         self.port = port
-        self.timeout = timeout
         self.baudrate = baudrate
+        self.bytesize = bytesize
+        self.parity = list(PARITY_NAMES.keys())[parity] 
+        self.stopbits = stopbits
+        self.timeout = timeout
+
         self.device = None
+
         self.connect()
 
 
@@ -29,10 +35,11 @@ class SerialConnection():
         :return: str. Error
         """
         try:
-            self.device = serial.Serial(self.port, timeout = self.timeout, baudrate = self.baudrate)
+            self.device = serial.Serial(port=self.port, baudrate=self.baudrate, bytesize=self.bytesize, parity=self.parity, stopbits=self.stopbits, timeout=self.timeout)
         except Exception as e:
+            self.device = None
             logging.error(str(e))
-            return str(e)
+            #raise str(e)
 
     def write(self, data):
         """

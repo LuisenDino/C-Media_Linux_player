@@ -1,37 +1,65 @@
+import json
 from ..Connection.SerialConnection import SerialConnection
 import threading
 import logging
+from ...Event import Event
 
 class BarCodeReader():
+    """
+    Clase de lector de codigo de barras Honeywell 3320G con conexion mediante puerto serial.
+    :param device: dic. Datos del lector.
+    """
     def __init__(self, device):
-        
+        """
+        Constructor de clase.
+        :param device: dic. Datos del lector.
+        """
+
         self.device = device
         self.result = None
         self.reader = None
         self.thread = None
         self.killThread = False
 
+        self.event = Event("Omnidireccional.Honeywell")
+
         self.connect()
+
+        
         #Constructor
         self.detalle = "Manejo de puerto serial"
 
     def get_result(self):
+        """
+        Obtiene el resultado del lector.
+        :return: resultado del lector.
+        """
         return self.result
 
+    def get_event(self):
+        return self.event
+
     def connect(self):
-        
+        """
+        Conecta el lector e inicia el hilo del lector.
+        """
         try:
-            self.reader = SerialConnection(self.device["port"]) #/dev/ttyACM0
+            self.reader = SerialConnection(self.device["NombrePuerto"], parity=0, stopbits=1, baudrate=9600) #/dev/ttyACM0
         except Exception as e:
             logging.error(str(e))
             return str(e)
-        
+
         if(self.thread == None and self.reader.device):
             self.thread = threading.Thread(target=self.receiveData)
             self.thread.start()
+        else:
+            self.reader = None
             
         
     def receiveData(self):
+        """
+        Recibe los datos provenientes del puerto y llama a la funcion que los procesa.
+        """
         if self.reader.device:
             while not self.killThread:
                 try:
@@ -45,32 +73,44 @@ class BarCodeReader():
                 while (not self.killThread) and (b != b"\r" or byte[-1] != ord("\r")):
                     b = self.reader.read()
                     byte+=b
-                self.procesar_datos(byte[0], byte[1:])
+                
                 try:
-                    pass
+                    self.procesar_datos(byte[0], byte[1:])
                 except Exception as e:
                     logging.error(str(e))
-                    self.result = bytes(byte[1:])
+                    self.result = {
+                        "error" : str(e), 
+                        "byte" :list(byte[1:])
+                        }
             
 
     def procesar_datos(self, prefix, byte):
-        
+        """
+        Procesa los datos del lector Documentos de identidad, codigos QR o de barras y lo guarda en la variable resultado.
+        En caso de error guarda en la variable un arreglo de enteros correspondientes a la lectura de bytes en hexadecimal.
+        """
         if(prefix != 114):
             try:
-                result = byte.decode("utf-8")
-                self.result = result
+                res = ""
+                for elem in byte:
+                    if elem <=32 or elem >= 126:
+                        return
+                    res += chr(elem)
+                result = res
+                self.event.awake("EstablecerCodigo", [json.dumps(result)])
+                return result
             except:
                 return
         else:
             cedula = {}
             if(byte[32:34] == b"CE"):
-                cedula["TipoDocumento"] = "CedulaExtrangeria"
+                cedula["TipoDocumento"] = 2
                 b=34
                 cedula_byte = bytearray()
                 while (byte[b] < 0x3A and byte[b] > 0x2F):
                     cedula_byte.append(byte[b])
                     b+=1
-                cedula["NumeroCedula"] = cedula_byte.decode('utf-8').replace('\0', "").lstrip("0")
+                cedula["Numero"] = cedula_byte.decode('utf-8').replace('\0', "").lstrip("0")
                 primer_apellido = bytearray()
                 for i in range(30):
                     primer_apellido.append(byte[i+52])
@@ -128,8 +168,12 @@ class BarCodeReader():
                 
                 cedula["Ciudad"] = city.decode('utf-8')
                 cedula["Ciudad"] = cedula["Ciudad"].replace("\0", "")
+                
+                cedula["LugarNacimiento"] = cedula["Departamento"] + cedula["Ciudad"]
+
+
             elif(byte[0] == ord("I")):
-                cedula["TipoDocumento"] = "TaretaIdentidad"
+                cedula["TipoDocumento"] = 1
                 cedula_byte = bytearray()
                 if(byte[48] == ord('0') and byte[49] == ord('0')):
                     b = 50
@@ -142,7 +186,7 @@ class BarCodeReader():
                         cedula_byte.append(byte[b])
                         b+=1
                     tempOffset = b
-                cedula["NumeroCedula"] = cedula_byte.decode('utf-8')
+                cedula["Numero"] = cedula_byte.decode('utf-8')
                 
                 primer_apellido = bytearray()
                 for i in range(23):
@@ -194,9 +238,12 @@ class BarCodeReader():
 
                 cedula["Ciudad"] = city.decode('utf-8')
 
+                cedula["LugarNacimiento"] = cedula["Departamento"] + cedula["Ciudad"]
+
                 cedula["Pais"] = "COL"
-            else:
-                cedula["TipoDocumento"] = "CedulaCiudadania"
+
+            elif (byte[1] == ord("3")):
+                cedula["TipoDocumento"] = 0
                 cedula_byte = bytearray()
                 if(byte[48] == ord('0') and byte[49] == ord('0')):
                     b = 50
@@ -208,7 +255,7 @@ class BarCodeReader():
                     while byte[b] <0x3A and byte[b] > 0x2F:
                         cedula_byte.append(byte[b])
                         b+=1
-                cedula["NumeroCedula"] = cedula_byte.decode('utf-8')
+                cedula["Numero"] = cedula_byte.decode('utf-8')
                 
                 primer_apellido = bytearray()
                 for i in range(23):
@@ -260,12 +307,60 @@ class BarCodeReader():
 
                 cedula["Ciudad"] = city.decode('utf-8')
 
+                cedula["LugarNacimiento"] = cedula["Departamento"] + cedula["Ciudad"]
+
                 cedula["Pais"] = "COL"
-            self.result = cedula
+
+            else:
+                cedula["TipoDocumento"] = 3
+                cedula_byte = bytearray()
+                b = 0
+                while byte[b] == ord("0"):
+                    b+=1
+                while byte[b] < 0x3A and byte[b] > 0x2F:
+                    cedula_byte.append(byte[b])
+                    b+=1
+
+                cedula["Numero"] = cedula_byte.decode("UTF-8")
+
+                primer_apellido = bytearray()
+                for i in range(25):
+                    primer_apellido.append(byte[i+31])
+
+                cedula["PrimerApellido"] = self.replaces(primer_apellido)
+
+                segundo_apellido = bytearray()
+                for i in range(25):
+                    segundo_apellido.append(byte[i+56])
+
+                cedula["SegundoApellido"] = self.replaces(segundo_apellido)
+
+                primer_nombre = bytearray()
+                for i in range(25):
+                    primer_nombre.append(byte[i+81])
+
+                cedula["PrimerNombre"] = self.replaces(primer_nombre)
+                
+                cedula["SegundoNombre"] = ""
+
+                cedula["Ciudad"] = ""
+                cedula["Departamento"] = ""
+                cedula["FechaDeNacimiento"] = ""
+                cedula["RH"] = ""
+                cedula["Pais"] = "COL"
+                cedula["Sexo"] = ""
+                cedula["LugarNacimiento"] = ""
+            
+            self.event.awake("EstablecerJsonDocumento", [json.dumps(cedula)])
             return cedula
         
 
     def replaces(self, byte):
+        """
+        Reemplaza caracteres en otros formatos a utf-8.
+        :param byte: bytearray. Datos con caracteres a reemplazar.
+        :return: Datos con caracteres cambiados.
+        """
         for i in range(len(byte)):
             if byte[i] == 209: 
                 byte[i]='Ñ'.encode("utf-8")
@@ -279,6 +374,10 @@ class BarCodeReader():
         return string
 
     def disconnect (self):
+
+        """
+        Desconecta el lector y destruye el hilo
+        """
         
         self.killThread = True
         if self.reader.device:
@@ -287,5 +386,10 @@ class BarCodeReader():
             self.thread.join()
         
     def clear_result(self):
+        """
+        Limpia el resultado de la clase
+        """
         self.result = None
 
+    def clear_event(self):
+        self.event.clear()

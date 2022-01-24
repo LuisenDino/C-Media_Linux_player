@@ -41,8 +41,7 @@ class UsbConnection():
         self.device = usb.core.find(idVendor = self.id_vendor, idProduct = self.id_product)
 
         if self.device is None:
-            logging.warning("Impresora no encontrado")
-            return "Impresora no encontrado"
+            return 1
 
         ep = self.device[0].interfaces()[0].endpoints() 
 

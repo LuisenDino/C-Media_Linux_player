@@ -1,25 +1,26 @@
 import logging
-#from AppFrames.MainFrame import MainFrame
-from App.AppFrames.MainFrame import MainFrame
+from AppFrames.MainFrame import MainFrame
+#from App.AppFrames.MainFrame import MainFrame
 import json
 import tkinter as tk
 import os
 import sys
 
-def main():
+def main(splash):
     """
     Funcion de inicio de la aplicacion    
     """
     pantallas = {}
     sett = get_sett()
     screen_config = get_screen_config(sett["Ruta"])
-
+    splash.destroy()
     root = tk.Tk(className="C-Media Player")
     root.attributes("-fullscreen", sett["PantallaCompleta"])
     root.attributes("-topmost", sett["SiempreVisible"])
     if not(sett["MostrarBordeVentana"]):
         root.overrideredirect(1)    
     root.geometry(str(sett["AnchoRequerido"])+"x"+str(sett["AltoRequerido"])+"+"+str(sett["LeftRequerido"])+"+"+str(sett["TopRequerido"]))
+    
     try:
         path = os.path.expanduser('~')+"/.config/Ciel/C-Media_Player/Media/LOGO-CMedia.png"
         icon = tk.PhotoImage(file=path)   
@@ -31,7 +32,8 @@ def main():
         pantallas[pantalla["ScreenNumber"]] = MainFrame(root, pantalla["Controles"])
         if(pantalla["ScreenNumber"]==1):
           root.title(pantalla["TitleName"])
-    pantallas[1].mainloop() 
+    
+    #pantallas[1].mainloop() 
     
 
 

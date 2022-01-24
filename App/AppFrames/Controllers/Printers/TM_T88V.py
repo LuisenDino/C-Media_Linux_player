@@ -1,40 +1,52 @@
+import json
 import pathlib #Libreria de control de directorios
 from ..Connection.UsbConnection import UsbConnection #Libreria de conexion usb
 from ..Connection.SerialConnection import SerialConnection #Libreria de conexion serial
 import time #Libreria control de tiempo (hilo principal)
 import math #Libreria de matematicas
 import cv2 #Libreria de manipulacion de imagenes
+from ...Event import Event
 
 class Printer():
 
     """
     Clase de impresora TM-T88V. Conexion mediante puerto serial y puerto USB.
-    :param device: dic. Datos de la impresora: id_vendor e id_product (USB) o puerto (Serial)
-    :param usb: bool. Uso o no de puerto serial
+    :param device: dic. Datos de la impresora
     """
     
-    def __init__(self, device, usb = False):
+    def __init__(self, device):
         
         """
         Constructor de clase
-        :param device: dic. Datos de la impresora: id_vendor e id_product (USB) o puerto (Serial)
-        :param usb: bool. Uso o no de puerto serial
+        :param device: dic. Datos de la impresora
         """
 
         self.__cambios = {}
         self.__version = None
-            
-        if usb:
-            self.printer = UsbConnection(int(device["id_vendor"], 16), int(device["id_product"], 16))
-        else:
-            self.printer = SerialConnection(device["port"]) #/dev/ttyUSB0 para puerto serial usb 0
+        self.event = Event("Impresion")
 
+            
+        if device ["NombrePuerto"] == "USB":
+            self.printer = UsbConnection(0x04b8, 0x0202)
+        else:
+            self.printer = SerialConnection(device["NombrePuerto"],baudrate=device["Baudios"], parity=device["Paridad"], stopbits=device["BitsParada"], bytesize=device["BitsDatos"]) #/dev/ttyUSB0 para puerto serial usb 0
+
+
+        if self.printer.device is None:
+            self.printer = None
+            self.event.awake("NotificarError", [json.dumps("Impresora No Encontrada")])
         #Constructor
         self.detalle = "Manejo de puerto USB o puerto serial segun selección"
         self.__cambios[self.__version] = self.detalle
 
     def getPrinter(self):
         return self.printer
+
+    def get_event(self):
+        return self.event
+
+    def clear_event(self):
+        self.event.clear()
 
     #ILibretaInfo Members
 
@@ -85,6 +97,7 @@ class Printer():
         """
          
         self.printer.write(b'\x1B\x76') #GS V       
+        time.sleep(0.2)
         paper_state = self.printer.read()
         response = {}
         if len(paper_state) == 0:
@@ -219,6 +232,7 @@ class Printer():
         if tamano > 5:
             if lineas[4] not in nempty or lineas[5] not in nempty:
                 if tamano > 13:
+                    #Verifica que las líneas de texto y código qr existan
                     if lineas[13] not in nempty or lineas[14] not in nempty:
                         if (tamano4 == "big" and tamano5 == "big") or (tamano4 == "big" and tamano6 == "big") or (tamano5 == "big" and tamano6 == "big"):
                             tx += bytearray([0x1B, 0x57, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,0xF0, 0x04]) #seleccion area de impresion
@@ -227,21 +241,22 @@ class Printer():
                             elif not(tamano6 == "big"):
                                 interlineado = (0x60, 0x40, 0x60)
                             else:
-                                interlineado = (0x60, 0x60, 0x40)
-                        elif tamano4 == "big" or tamano4 == "big" or tamano4 == "big":
+                                interlineado = (0x60, 0x60, 0x60)
+                        elif tamano4 == "big" or tamano5 == "big" or tamano6 == "big":
                             tx += bytearray([0x1B, 0x57, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,0xC0, 0x04]) #seleccion area de impresion
                             if tamano4 == "big":
                                 interlineado = (0x40, 0x40, 0x30)
-                            elif tamano5 == "big":
+                            elif tamano5 != "big":
                                 interlineado = (0x60, 0x40, 0x30)
                             else:
                                 interlineado = (0x40, 0x60, 0x30)
                         else:
-                            tx += bytearray([0x1B, 0x57, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,0x70, 0x03]) #seleccion area de impresion
+                            tx += bytearray([0x1B, 0x57, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,0x70, 0x04]) #seleccion area de impresion
                             interlineado = (0x30, 0x30, 0x30)
+                    #No existen lineas configuradas para qr
                     else:
                         if (tamano4 == "big" and tamano5 == "big") or (tamano4 == "big" and tamano6 == "big") or (tamano6 == "big" and tamano5 == "big"):
-                            tx += bytearray([0x1B, 0x57, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,0xC0, 0x03]) #seleccion area de impresion
+                            tx += bytearray([0x1B, 0x57, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,0x8E, 0x03]) #seleccion area de impresion
                             if not (tamano5 == "big"):
                                 interlineado = (0x40, 0x60, 0x60)
                             elif not (tamano6 == "big"):
@@ -259,6 +274,7 @@ class Printer():
                         else:
                             tx += bytearray([0x1B, 0x57, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,0x3E, 0x03]) #seleccion area de impresion
                             interlineado = (0x30, 0x30, 0x30)
+                #llegan menos de 13 lineas            
                 else:
                     if (tamano4 == "big" and tamano5 == "big") or (tamano4 == "big" and tamano6 == "big") or (tamano6 == "big" and tamano5 == "big"):
                         tx += bytearray([0x1B, 0x57, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,0x8E, 0x03]) #seleccion area de impresion
@@ -279,22 +295,28 @@ class Printer():
                     else:
                         tx += bytearray([0x1B, 0x57, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,0x3E, 0x03]) #seleccion area de impresion
                         interlineado = (0x30, 0x30, 0x30)
+
+            #las lineas 4 y 5 estan vacias
             else:
                 if tamano > 13:
+                    #Verifica que las lineas de text y codigo qr existan
                     if lineas[13] not in nempty or lineas[14] not in nempty:
                         tx += bytearray([0x1B, 0x57, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,0xBE, 0x02]) #seleccion area de impresion
                         interlineado = (0x30, 0x30, 0x30)
+                    #No existeb las lineas configuradas para qr
                     else:
                         tx += bytearray([0x1B, 0x57, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,0xBE, 0x02]) #seleccion area de impresion
                         interlineado = (0x30, 0x30, 0x30)
+                #llegan menos de 13 lineas
                 else:
                     tx += bytearray([0x1B, 0x57, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,0xBE, 0x02]) #seleccion area de impresion
                     interlineado = (0x30, 0x30, 0x30)
         else:
             tx += bytearray([0x1B, 0x57, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,0x9E, 0x02]) #seleccion area de impresion
+            interlineado = (0x30, 0x30, 0x30)
         tx += bytearray([0x1B, 0x54, 0x02]) #Direccion de impresion de derecha izquierda
         tx += bytearray([0x1D, 0x5C, 0x40, 0x02]) #Posicion vertical relativa
-        tx += bytearray([0x1D, 0x2F, 0x00]) #Imprimir Logo cuádruple
+        tx += bytearray([0x1D, 0x2F, 0x33]) #Imprimir Logo cuádruple
         if tamano > 5:
             # Verifica que la linea 5 o 6 tenga texto que imprimir
             if lineas[5] not in nempty or lineas[4] not in nempty:
@@ -619,7 +641,7 @@ class Printer():
         :param bitmap: str. ubicacion del logo en formato .bmp
         :return: bytearray. i
         """
-        print(bitmap)
+        
         array = bytearray()
         img =  cv2.imread(bitmap)
         height, width = img.shape[0:2]
