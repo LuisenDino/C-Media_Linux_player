@@ -7,6 +7,49 @@
 </head>
 <body>
     <script>
+        var Ciel = {
+            MPC:{
+                WebPlayer : {
+                    Controles: {
+                        Impresion :{
+                            NotificarError: function(error){
+                                alert(error)
+                            }
+                        },
+                        Omnidireccional:{
+                            Honeywell:{
+                                EstablecerJsonDocumento : function(json){
+                                    ced = document.getElementById("cedula");
+                                    ced.innerHTML = ""
+                                    table = document.createElement("table");
+                                    tbody = document.createElement("tbody");
+                                    Object.keys(json).forEach(function(element){
+                                        trow = document.createElement("tr");
+                                        th = document.createElement("th");
+                                        th.innerHTML = element;
+                                        cedula = document.createElement("td")
+                                        cedula.innerHTML = json[element]
+                                        trow.appendChild(th)
+                                        trow.appendChild(cedula)
+                                        tbody.appendChild(trow)
+                                    })
+
+                                    table.appendChild(tbody)
+                                    ced.appendChild(table)
+                                },
+                                EstablecerCodigo : function(codigo){
+                                    ced = document.getElementById("cedula");
+                                    ced.innerHTML = ""  
+                                    p = document.createElement("p")
+                                    p.innerHTML = codigo
+                                    ced.appendChild(p)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         function send_text(){   
                window.api.printer.imprimir(document.getElementById("texto").value);
@@ -26,37 +69,10 @@
         }
 
         function get_cedula(){
-            try{
-                window.api.code_reader.get_result().then(function(response){
-                    ced = document.getElementById("cedula");
-                    ced.innerHTML = '<button id="get_cedula", onclick="get_cedula()">Obtener Cedula</button>'
-                    if(typeof response == "object"){
-                        table = document.createElement("table");
-                        tbody = document.createElement("tbody");
-                        Object.keys(response).forEach(function(element){
-                            trow = document.createElement("tr");
-                            th = document.createElement("th");
-                            th.innerHTML = element;
-                            cedula = document.createElement("td")
-                            cedula.innerHTML = response[element]
-                            trow.appendChild(th)
-                            trow.appendChild(cedula)
-                            tbody.appendChild(trow)
-                        })
-
-                        table.appendChild(tbody)
-                        ced.appendChild(table)
-                    }else{
-                        p = document.createElement("p")
-                        p.innerHTML = response
-                        ced.appendChild(p)
-                    }
-                })}
-            catch(error){
-                document.getElementById("paper_state").innerHTML = error; 
-            }
+            alert("hola")
         }
     </script>
+    <p id="error"></p>
     <h1>Hola Mundo!</h1>
     <div>
         <textarea id="texto" rows="15" cols="20" wrap="soft"></textarea>
