@@ -49,7 +49,7 @@
           "RotarControl": true,
           "ObjetoBase": {
             "UrlInicio": "file:///home/luis/Escritorio/C-Media_Linux_player/example.html",
-            "MostrarBarraNavegacion": false,
+            "MostrarBarraNavegacion": true,
             "ReiniciarDuracionPantalla": false,
             "Duracion": "00:00:05",
             "MostrarVentanasNuevas": false,

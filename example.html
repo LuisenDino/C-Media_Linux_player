@@ -3,6 +3,15 @@
 <head>
     <meta charset='utf-8'>
     <title>Page Title</title>
+    <style>
+        body{
+            background-color: yellowgreen;
+        }
+
+        div{
+            background-color: rgba(0,0,0, 0.5);
+        }
+    </style>
     <!--<script src='main.js'></script>-->
 </head>
 <body>
@@ -18,6 +27,9 @@
                         },
                         Omnidireccional:{
                             Honeywell:{
+                                NotificarError: function(error){
+                                    alert(error)
+                                },
                                 EstablecerJsonDocumento : function(json){
                                     ced = document.getElementById("cedula");
                                     ced.innerHTML = ""
@@ -74,6 +86,7 @@
     </script>
     <p id="error"></p>
     <h1>Hola Mundo!</h1>
+    <a href="https://github.com/cztomczak/cefpython/blob/master/examples/tkinter_.py">Link</a>
     <div>
         <textarea id="texto" rows="15" cols="20" wrap="soft"></textarea>
         <button id="print" onclick="send_text()">Print</button>

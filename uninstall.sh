@@ -1,8 +1,8 @@
 sudo rm /usr/share/applications/C-Media_Player_config.desktop 
 sudo rm /usr/share/applications/C-Media_Player.desktop 
-sudo rm "$HOME/Escritorio/C-Media_Player_config.desktop" 
-sudo rm "$HOME/Escritorio/C-Media_Player.desktop" 
-sudo rm -r CMedia_Player /usr/share/C-Media_Player
+sudo rm "$HOME/Escritorio/C-Media_Player_config.desktop" ||sudo rm "$HOME/Desktop/C-Media_Player_config.desktop" 
+sudo rm "$HOME/Escritorio/C-Media_Player.desktop" || sudo rm "$HOME/Desktop/C-Media_Player.desktop"
+sudo rm -r /usr/share/C-Media_Player
 sudo rm /usr/bin/C-Media_Player 
 sudo rm /usr/share/pixmaps/CmediaPlayer.png
 sudo rm /lib/udev/rules.d/50-CMediaPlayer.rules

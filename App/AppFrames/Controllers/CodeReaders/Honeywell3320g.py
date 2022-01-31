@@ -53,6 +53,7 @@ class BarCodeReader():
             self.thread = threading.Thread(target=self.receiveData)
             self.thread.start()
         else:
+            self.event.awake("NotificarError", [json.dumps("Lector No Encontrado")])
             self.reader = None
             
         
@@ -65,6 +66,7 @@ class BarCodeReader():
                 try:
                     b = self.reader.read() 
                 except Exception as e:
+                    self.event.awake("NotificarError", [json.dumps("Error al leer los datos")])
                     logging.error(str(e)) 
                 if(self.killThread):
                     break
@@ -75,8 +77,9 @@ class BarCodeReader():
                     byte+=b
                 
                 try:
-                    self.procesar_datos(byte[0], byte[1:])
+                    self.procesar_datos(byte[0], byte[1:-1])
                 except Exception as e:
+                    self.event.awake("NotificarError", [json.dumps("Error al interpretar la lectura")])
                     logging.error(str(e))
                     self.result = {
                         "error" : str(e), 
@@ -92,11 +95,14 @@ class BarCodeReader():
         if(prefix != 114):
             try:
                 res = ""
+                print(byte)
                 for elem in byte:
                     if elem <=32 or elem >= 126:
                         return
                     res += chr(elem)
+                    
                 result = res
+                print(result)
                 self.event.awake("EstablecerCodigo", [json.dumps(result)])
                 return result
             except:
@@ -124,12 +130,12 @@ class BarCodeReader():
                 primer_nombre = bytearray()
                 segundo_nombre = bytearray()
                 b = 0
-                while byte[b+112] != 0x20:
-                    primer_nombre.append(b+112)
+                while byte[b + 112] != 0x20:
+                    primer_nombre.append(byte[b+112])
                     b+=1
                 
                 while byte[b + 112] != 0:
-                    segundo_nombre.append(b+112)
+                    segundo_nombre.append(byte[b+112])
                     b+=1
                 
                 cedula["PrimerNombre"] = self.replaces(primer_nombre)
@@ -380,7 +386,7 @@ class BarCodeReader():
         """
         
         self.killThread = True
-        if self.reader.device:
+        if self.reader:
             self.reader.device.cancel_read()
         if self.thread:
             self.thread.join()

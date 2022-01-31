@@ -4,6 +4,7 @@ class Event():
         self.nombre_js = nombre_js
         self.function = ""
         self.params = ""
+        self.browser = None
 
     def awake(self, function, params):
         """
@@ -14,6 +15,10 @@ class Event():
         self.value = True
         self.function = function
         self.params = params
+        if self.browser:
+            js = "Ciel.MPC.WebPlayer.Controles."+self.nombre_js+"."+self.function+"("+",".join(self.params)+")"
+            self.browser.ExecuteJavascript(js)
+            self.clear_event()
 
     def clear(self):
         self.value = False
@@ -22,3 +27,6 @@ class Event():
 
     def get(self):
         return self.value
+
+    def set_browser(self, browser):
+        self.browser = browser

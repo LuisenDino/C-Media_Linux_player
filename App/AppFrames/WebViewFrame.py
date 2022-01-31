@@ -3,7 +3,8 @@ import threading
 import tkinter as tk #Librería GUI
 from cefpython3 import cefpython as cef #Librería Chromium Embeded Framework
 from .JSBridge import JSBridge #Clase que permite la interaccipn entre la url y la aplicacion local
-
+from .NavBar import NavigationBar
+#from .EventHandler import EventHandler
 
 class WebViewFrame(tk.Frame):
     """
@@ -12,7 +13,7 @@ class WebViewFrame(tk.Frame):
     :param url: str. url del html (Para archivos 'file://{ubicacion}')
     """
  
-    def __init__(self, parent, url):
+    def __init__(self, parent, settings):
         """
         Constructor de Clase
         :param parent: tk.Frame. tk.Tk. Frame o ventana donde sera anadido el contenedor
@@ -20,10 +21,20 @@ class WebViewFrame(tk.Frame):
         """
         self.closing = False
         self.browser = None
-        self.kill_thread = False
+        self.nav_bar = None
+        self.settings = settings
+        self.parent = parent
+        
+        #self.event_handler = None
+        #self.event_handler = EventHandler()
 
-        self.url = url
+        if self.settings["MostrarBarraNavegacion"]:
+            self.nav_bar = NavigationBar(self.parent)
+            self.nav_bar.grid(row=0, column=0, sticky= (tk.E + tk.W))
+
+        self.url = settings["UrlInicio"]
         tk.Frame.__init__(self, parent)
+        self.configure(bg="blue")
         self.bind("<Configure>", self.on_configure)
         
 
@@ -35,11 +46,18 @@ class WebViewFrame(tk.Frame):
         rect = [0, 0, self.winfo_width(), self.winfo_height()]  #Informacion del rectangulo del frame del contenedor CEF [Left, Top, Right, Bottom]
         window_info.SetAsChild(self.winfo_id(), rect) #Crea el navegador como una ventana/vista hijo
         self.config(bg="red")
+        rect
+        settings = {
+            "background_color" : 0xc93c20
+        }
         try:
-            self.browser = cef.CreateBrowserSync(window_info, url=self.url) #Creacion del navegador
+            self.browser = cef.CreateBrowserSync(window_info, url=self.url, settings=settings) #Creacion del navegador
         except Exception as e:
             logging.error(str(e))
         assert self.browser
+
+        if self.nav_bar:
+            self.nav_bar.set_browser(self.browser)
         
         self.message_loop_work()
     
@@ -84,8 +102,8 @@ class WebViewFrame(tk.Frame):
         """
         if self.browser:    
             self.js_bridge = JSBridge(self.browser, apis)
-            self.thread = threading.Thread(target=lambda:self.run_events(apis))
-            self.browser.SetClientHandler(LoadHandler(self.js_bridge.parse_api_js(), self.thread))
+            #self.event_handler.set_apis(apis)
+            self.browser.SetClientHandler(LoadHandler(self.js_bridge.parse_api_js(), apis, self.nav_bar))
             bindings = cef.JavascriptBindings(bindToFrames=True, bindToPopups=True)
             bindings.SetObject("external", self.js_bridge)
             self.browser.SetJavascriptBindings(bindings)
@@ -95,9 +113,10 @@ class WebViewFrame(tk.Frame):
         Llamada al cerrar la aplicacion superior
         """
         if self.browser:
-            self.kill()
-            self.browser.CloseBrowser(True)
+            #self.event_handler.kill()
+            self.browser.CloseBrowser(True)            
             self.clear_browser_references()
+            
             
     
     def clear_browser_references(self):
@@ -107,34 +126,21 @@ class WebViewFrame(tk.Frame):
         self.browser = None
 
 
-    def run_events(self, apis):
-        while not self.kill_thread:
-            for controller  in apis.values():
-                event = controller.get_event()
-                
-                if event.get() and self.browser:
-                    js = "Ciel.MPC.WebPlayer.Controles."+event.nombre_js+"."+event.function+"("+",".join(event.params)+")"
-                    print(js)
-                    self.browser.ExecuteJavascript(js)
-                    controller.clear_event()
-
-    def kill(self):
-        self.kill_thread = True
-
-
 
 class LoadHandler(object):
     """
     Clase de manejo de carga del navegador
     :param script: str. script de inicio del navegador
     """
-    def __init__(self, script, thread):
+    def __init__(self, script, apis, nav_bar = None):
         """
         Constructor de clase
         :param script: str. script de inicio del navegador
         """
         self.script = script
-        self.thread = thread
+        self.apis = apis
+        self.nav_bar = nav_bar
+        #self.event_handler = event_handler
 
 
     def OnLoadingStateChange(self, browser, is_loading, **_):
@@ -147,5 +153,12 @@ class LoadHandler(object):
         if not is_loading:
             browser.GetJavascriptBindings().Rebind()
             browser.ExecuteJavascript(self.script)
-            
-            self.thread.start()  
+            #self.event_handler.set_browser(browser)
+            for api in list(self.apis.values()):
+                api.get_event().set_browser(browser)
+        
+    def OnLoadStart(self, browser, **_):
+        if self.nav_bar:
+            self.nav_bar.set_url(browser.GetUrl())
+
+              

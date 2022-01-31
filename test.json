@@ -1,0 +1,123 @@
+[{
+    "Nombre": "WebView",
+    "Habilidado": true,
+    "ControlPosition": {
+      "VerticalLength": 236,
+      "HorizontalLength": 972,
+      "ZIndex": 1
+    },
+    "ControlStyle": {
+      "BackGroundColor": {
+        "A": 0,
+        "R": 255,
+        "G": 255,
+        "B": 255,
+        "ARGB": "#00FFFFFF",
+        "Tipo": "Color"
+      },
+      "Visibilidad": 0,
+      "Opacity": 1,
+      "Width": 298,
+      "Height": 268,
+      "InnerControlsAlignmentX": 1,
+      "InnerControlsAlignmentY": 1
+    },
+    "RotarControl": true,
+    "ObjetoBase": {
+      "UrlInicio": "file:///home/luis/Escritorio/C-Media_Linux_player/example.html",
+      "MostrarBarraNavegacion": true,
+      "ReiniciarDuracionPantalla": false,
+      "Duracion": "00:00:05",
+      "MostrarVentanasNuevas": false,
+      "MostrarVentanasNuevasEnNavegador": false,
+      "LogInternoHabilitado": false,
+      "PermitirTransparencia": false,
+      "HabilitarTecladoVirtual": false,
+      "RutaTeclado": "C:\\Program Files\\Common Files\\microsoft shared\\ink\\tabtip.exe",
+      "TiposInputPermitidos": [
+        "text",
+        "tel",
+        "url",
+        "checkbox",
+        "radio"
+      ],
+      "TiposInputClassPermitidos": [],
+      "HabilitarDescargas": false,
+      "HabilitarGuardarDescarga": false,
+      "MimeTypesDescargables": [
+        "application/pdf"
+      ],
+      "TiposInputNamePermitidos": [],
+      "MostrarVentanaDepuracion": false,
+      "HabilitarScroll": false,
+      "MostrarMenuContextual": true,
+      "AccionesAlRetornarLlamadoJs": [],
+      "CefCommandLineArgs": [
+        {
+          "Item1": "disable-gpu",
+          "Item2": "1"
+        },
+        {
+          "Item1": "enable-system-flash",
+          "Item2": "1"
+        },
+        {
+          "Item1": "disable-web-security",
+          "Item2": "disable-web-security"
+        },
+        {
+          "Item1": "autoplay-policy",
+          "Item2": "no-user-gesture-required"
+        },
+        {
+          "Item1": "enable-media-stream",
+          "Item2": "1"
+        },
+        {
+          "Item1": "disable-gpu",
+          "Item2": "1"
+        },
+        {
+          "Item1": "enable-system-flash",
+          "Item2": "1"
+        },
+        {
+          "Item1": "disable-web-security",
+          "Item2": "disable-web-security"
+        },
+        {
+          "Item1": "autoplay-policy",
+          "Item2": "no-user-gesture-required"
+        },
+        {
+          "Item1": "enable-media-stream",
+          "Item2": "1"
+        },
+        {
+          "Item1": "disable-gpu",
+          "Item2": "1"
+        },
+        {
+          "Item1": "enable-system-flash",
+          "Item2": "1"
+        },
+        {
+          "Item1": "disable-web-security",
+          "Item2": "disable-web-security"
+        },
+        {
+          "Item1": "autoplay-policy",
+          "Item2": "no-user-gesture-required"
+        },
+        {
+          "Item1": "enable-media-stream",
+          "Item2": "1"
+        }
+      ],
+      "MostrarBotonImprimirPdf": false,
+      "URLAdobeAcrobat": "C:\\Program Files (x86)\\Adobe\\Acrobat Reader DC\\Reader\\AcroRd32.exe",
+      "CerrarPopupAlImprimir": false,
+      "UserAgent": ""
+    },
+    "NombreArchivo": "Control.NavegadorWebChrome.dll"
+  }]

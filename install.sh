@@ -1,5 +1,9 @@
 sudo cp C-Media_Player_config.desktop C-Media_Player.desktop /usr/share/applications
 sudo cp C-Media_Player_config.desktop C-Media_Player.desktop "$HOME/Escritorio" || sudo cp C-Media_Player_config.desktop C-Media_Player.desktop "$HOME/Desktop"
+sudo chown $USER:dialout "$HOME/Escritorio/C-Media_Player_config.desktop" 
+sudo chown $USER:dialout "$HOME/Escritorio/C-Media_Player.desktop" 
+sudo chmod 775 "$HOME/Escritorio/C-Media_Player_config.desktop" 
+sudo chmod 775 "$HOME/Escritorio/C-Media_Player.desktop" 
 sudo cp -r CMedia_Player /usr/share/C-Media_Player
 sudo cp C-Media_Player /usr/bin
 sudo cp logo/CmediaPlayer.png /usr/share/pixmaps/CmediaPlayer.png

@@ -1,11 +1,10 @@
 import logging
-import threading
 import tkinter as tk
 import sys
-
 from .CodeReaderFrame import CodeReaderFrame
 from .WebViewFrame import WebViewFrame
 from .PrinterFrame import PrinterFrame
+from .NavBar import NavigationBar
 from cefpython3 import cefpython as cef
 
 class MainFrame(tk.Frame):
@@ -22,6 +21,7 @@ class MainFrame(tk.Frame):
         """
         self.webview_frame = None
         self.printer_frame = None
+        self.code_reader_frame = None
         self.controllers = controllers
 
 
@@ -40,8 +40,9 @@ class MainFrame(tk.Frame):
                 self.apis["printer"] = self.printer_frame.get_printer()
             #BrowserFrame
             elif "Control.NavegadorWebChrome.dll" in controller["NombreArchivo"]:
-                self.webview_frame = WebViewFrame(self, url=controller["ObjetoBase"]["UrlInicio"])
+                self.webview_frame = WebViewFrame(self, settings = controller["ObjetoBase"])
                 self.webview_frame.grid(row=1, column=0,sticky=(tk.N + tk.S + tk.E + tk.W))
+                
             elif "Control.Captura.CodigoBarras.Omnidireccional.Honeywell.dll" in controller["NombreArchivo"]:
                 self.code_reader_frame = CodeReaderFrame(controller["ObjetoBase"])
                 self.apis["code_reader"] = self.code_reader_frame.get_code_reader()
@@ -51,6 +52,8 @@ class MainFrame(tk.Frame):
         if(self.webview_frame):
             try:
                 cef.Initialize()
+                cef.PostTask(cef.TID_UI, lambda : self.webview_frame.load_apis(self.apis))
+                
             except Exception as e :
                 logging.error(str(e))
                 return e  
@@ -69,7 +72,8 @@ class MainFrame(tk.Frame):
                 cef.Shutdown()  
             except Exception as e:
                 logging.error(str(e))
-        self.get_code_reader_frame().get_code_reader().disconnect()
+        if self.code_reader_frame:
+            self.code_reader_frame.get_code_reader().disconnect()
         sys.exit()
 
     def on_root_configure(self, _):
@@ -79,7 +83,6 @@ class MainFrame(tk.Frame):
         """
         if self.webview_frame:
             self.webview_frame.on_root_configure()
-            self.webview_frame.load_apis(self.apis)
     
     def on_configure(self, event):
         """
