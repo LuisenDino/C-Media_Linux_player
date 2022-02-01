@@ -1,9 +1,9 @@
 import sys
 import logging
-import Player
-import Configuration
-#from App import Player
-#from App import Configuration
+#import Player
+#import Configuration
+from App import Player
+from App import Configuration
 import os
 import tkinter as tk
 from screeninfo import get_monitors

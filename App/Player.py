@@ -1,6 +1,6 @@
 import logging
-from AppFrames.MainFrame import MainFrame
-#from App.AppFrames.MainFrame import MainFrame
+#from AppFrames.MainFrame import MainFrame
+from App.AppFrames.MainFrame import MainFrame
 import json
 import tkinter as tk
 import os

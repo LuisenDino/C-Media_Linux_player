@@ -1,7 +1,7 @@
 from tkinter import messagebox
 import tkinter as tk
-from ConfigGUI.MainFrame import MainFrame
-#from App.ConfigGUI.MainFrame import MainFrame
+#from ConfigGUI.MainFrame import MainFrame
+from App.ConfigGUI.MainFrame import MainFrame
 import logging
 import sys
 import os

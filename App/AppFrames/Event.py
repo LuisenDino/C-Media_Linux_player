@@ -18,7 +18,7 @@ class Event():
         if self.browser:
             js = "Ciel.MPC.WebPlayer.Controles."+self.nombre_js+"."+self.function+"("+",".join(self.params)+")"
             self.browser.ExecuteJavascript(js)
-            self.clear_event()
+            self.clear()
 
     def clear(self):
         self.value = False
