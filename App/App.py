@@ -25,7 +25,7 @@ for monitor in monitors:
 splash_root.configure(background="#f3f3f3")
 #splash_root.configure(background="#0a3749")
 
-img = tk.PhotoImage(file="/home/luis/Descargas/C-MediaRecursos/SplashScreen.png")
+img = tk.PhotoImage(file=os.path.expanduser('~')+"/.config/Ciel/C-Media_Player/Media/SplashScreen.png")
 #tk.Label(splash_root, image=img, bg="#0a3749").pack(fill=tk.BOTH, expand=True)
 tk.Label(splash_root, image=img, bg="#f3f3f3").pack(fill=tk.BOTH, expand=True)
 splash_root.overrideredirect(True)
