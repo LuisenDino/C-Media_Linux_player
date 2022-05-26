@@ -4,18 +4,20 @@
     <meta charset='utf-8'>
     <title>Page Title</title>
     <style>
+        
         body{
-            background-color: yellowgreen;
+            background-color: white;
         }
 
         div{
-            background-color: rgba(0,0,0, 0.5);
+            background-color: rgba(0,0,0, 0);
         }
     </style>
     <!--<script src='main.js'></script>-->
 </head>
 <body>
     <script>
+        
         var Ciel = {
             MPC:{
                 WebPlayer : {
@@ -31,16 +33,18 @@
                                     alert(error)
                                 },
                                 EstablecerJsonDocumento : function(json){
+                                    text = json.replace("$#$", "{").replace("#$#", "}").replace(/%#/g, ",");
+                                    obj = JSON.parse(text)
                                     ced = document.getElementById("cedula");
-                                    ced.innerHTML = ""
+                                    ced.innerHTML = "<h2>Cédula</h2>"
                                     table = document.createElement("table");
                                     tbody = document.createElement("tbody");
-                                    Object.keys(json).forEach(function(element){
+                                    Object.keys(obj).forEach(function(element){
                                         trow = document.createElement("tr");
                                         th = document.createElement("th");
                                         th.innerHTML = element;
                                         cedula = document.createElement("td")
-                                        cedula.innerHTML = json[element]
+                                        cedula.innerHTML = obj[element]
                                         trow.appendChild(th)
                                         trow.appendChild(cedula)
                                         tbody.appendChild(trow)
@@ -51,7 +55,7 @@
                                 },
                                 EstablecerCodigo : function(codigo){
                                     ced = document.getElementById("cedula");
-                                    ced.innerHTML = ""  
+                                    ced.innerHTML = "<h2>Código</h2>"  
                                     p = document.createElement("p")
                                     p.innerHTML = codigo
                                     ced.appendChild(p)
@@ -63,8 +67,20 @@
             }
         }
 
+        
+        
+        function updateOnlineStatus () {
+            document.getElementById('status').innerHTML = navigator.onLine ? 'online' : 'offline'
+        }
+
+        window.addEventListener('online', updateOnlineStatus)
+        window.addEventListener('offline', updateOnlineStatus)
+
+        updateOnlineStatus()
+
         function send_text(){   
-               window.api.printer.imprimir(document.getElementById("texto").value);
+            alert(navigator.onLine)
+            window.api.printer.imprimir(document.getElementById("texto").value);
         }
 
         function get_paper(){
@@ -72,6 +88,7 @@
             try{
                 window.api.printer.get_paper().then(function(response){
                     document.getElementById("paper_state").innerHTML = response.message
+                
                 })
                 
             }catch(error){
@@ -79,25 +96,109 @@
             }
             
         }
-
+        
         function get_cedula(){
-            alert("hola")
+            var a = {
+                text: document.getElementById("texto").value
+            }
+            window.speechSynthesis.speak(a);
         }
+        
+        
+
+
+        /*function Sintetizador(n){
+            var u=!1,t=0,f=!1,r;
+            this.ttsNavegador=window.speechSynthesis;
+            this.settings=$.extend({},{repeticiones:0,volumen:1,tono:1,frecuecia:.8,voz:"Microsoft Sabina Desktop",callbackExtraerMensajeGrilla:null,callbackFinalizaReproduccion:null},n);
+            r=this;
+            this.colaMensajes=[];
+            this.encolarMensajes=function(n){
+                if(this.colaMensajes=[],this.detenerReproduccionVoz(),Array.isArray(n)){
+                    for(var i=0;i<n.length;i++)this.colaMensajes.push(n[i]);
+                    t=0;this.ttsNavegador.speaking||this.reproducirMensajes()
+                }
+            };
+            this.encolarMensaje=function(n){
+                this.cancelarReproduccion();this.colaMensajes.push(n);
+                for(var i=0;i<this.settings.repeticiones;i++)this.colaMensajes.push(n);
+                t=0;
+                this.ttsNavegador.speaking||setTimeout(function(){r.reproducirMensajes()},500)
+            };
+            this.seleccionarVoz=function(n){
+                var r,t;for(n=n.replace(" Desktop",""),voices=this.ttsNavegador.getVoices(),r=n.split("|"),t=0;t<r.length;t++)
+                for(i=0;i<voices.length;i++)if(voices[i].name.toUpperCase().indexOf(r[t].toUpperCase())>=0)return voices[i]
+            };
+            this.reproducirMensajes=function(){
+                while(t<this.colaMensajes.length){
+                    if(this.colaMensajes[t]!=undefined){
+                        var n=new SpeechSynthesisUtterance(this.colaMensajes[t]);
+                        n.pitch=this.settings.tono;
+                        n.rate=this.settings.frecuecia;
+                        n.volume=this.settings.volumen;
+                        n.onerror=function(n){console.log(n)};
+                            n.onend=function(){u&&(f=!0,r.ttsNavegador.cancel(),u=!1,t=0,setTimeout(function(){r.reproducirMensajes()},250));
+                        typeof r.settings.callbackFinalizaReproduccion=="function"&&r.settings.callbackFinalizaReproduccion(r)};
+                        n.voice=this.seleccionarVoz(this.settings.voz);
+                        this.ttsNavegador.speak(n)
+                    }t++
+                }
+                this.colaMensajes=[]
+            };
+            this.detenerReproduccionVoz=function(){
+                this.ttsNavegador.speaking&&(u=!0)
+            };
+            this.cancelarReproduccion=function(){
+                this.ttsNavegador.cancel()
+            };
+            this.IFuenteDatosObservador={};
+            this.IFuenteDatosObservador.Notificar=function(n){
+                var i,e,u,r,o,f,t;
+                if(n&&n.Filas){
+                    for(i=[],t=0;t<n.Filas.length;t++)if(n.Filas[t].Habilitada&&n.Filas[t].DebeSintetizar){
+                        for(e=n.Filas[t].Celdas,u="",r=0;r<n.Columnas.length;r++)typeof this.settings.callbackExtraerMensajeGrilla=="function"?u=this.settings.callbackExtraerMensajeGrilla(this,n,n.Filas[t],r):u+=titulo+" "+e[r].ContenidoString;i.push(u)
+                    }
+                    for(o=i.length,f=0;f<this.settings.repeticiones;f++)for(t=0;t<o;t++)i.push(i[t]);
+                    this.encolarMensajes(i)
+                }
+            }.bind(this)
+        };*/
+
+        
     </script>
     <p id="error"></p>
-    <h1>Hola Mundo!</h1>
-    <a href="https://github.com/cztomczak/cefpython/blob/master/examples/tkinter_.py">Link</a>
+    <h1>C-Media Player Linux</h1>
+    <a href="https://www.cielingenieria.com/">Link</a>
     <div>
         <textarea id="texto" rows="15" cols="20" wrap="soft"></textarea>
         <button id="print" onclick="send_text()">Print</button>
     </div>
-    <div>
+    <!--<div>
         <p id="paper_state">Hola</p>
         <button id="paper", onclick="get_paper()">Estado del papel</button>
+    </div>-->
+    <div id="status"></div>
+    <div>
+    	<video width="320" height="180" controls>
+            <source src="/home/luis/Descargas/video.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <video width="320" height="180" controls>
+            <source src="/home/luis/Descargas/video.webm" type="video/webm">
+            Your browser does not support the video tag.
+        </video>
+        <audio controls>
+            <source src="/home/luis/Descargas/video.ogg" type="audio/ogg">
+            <!--<source src="horse.mp3" type="audio/mpeg">-->
+            Your browser does not support the audio tag.
+        </audio> 
     </div>
     <div id="cedula">
         <button id="get_cedula", onclick="get_cedula()">Obtener Cedula</button>
     </div>
+
+    
+
 
 </body>
 </html>
